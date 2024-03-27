@@ -1,10 +1,28 @@
-const {PDFNet} = require('@pdftron/pdfnet-node');
 const express = require('express')
-const path = require('path')
+const morgan = require('morgan')
+const path = require('path');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+
 const fs = require('fs');
+const {PDFNet} = require('@pdftron/pdfnet-node');
+const cors = require('cors');
+
 require('dotenv').config()
 
 const app = express()
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cors());
+app.use(
+    bodyParser.urlencoded({
+        extended: true,
+    })
+)
+app.use(morgan('combined'))
+
+const db = require('./config/database');
+db.connect();
 
 app.get('/', (req, res) => {
     console.log(req.query)
