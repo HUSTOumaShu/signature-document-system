@@ -1,8 +1,10 @@
-const {default: mongoose} = require('mongoose');
+let mongoose = require('mongoose');
 const slug = require('mongoose-slug-generator');
 const mongooseDelete = require('mongoose-delete');
 
-const Account = new mongoose.Schema(
+const Schema = mongoose.Schema;
+
+const Account = new Schema(
     {
         email: {type: String, required: true},
         password: {type: String, required: true},
