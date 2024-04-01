@@ -15,4 +15,41 @@ const firebaseConfig = {
 export const firebase = initializeApp(firebaseConfig);
 export const auth = getAuth(firebase)
 export const filestore = getFirestore(firebase)
+<<<<<<< HEAD
 export const storage = getStorage(firebase)
+=======
+export const storage = getStorage(firebase)
+
+export const generateUserDocument = async (user, additionalData) => {
+    if(!user) return;
+    const userRef = filestore.doc(`users/${user.uid}`)
+    const snapshot = await userRef.get();
+    if(!snapshot.exists) {
+        const {email, displayName, photoURL} = user;
+        try {
+            await userRef.set({
+                displayName,
+                email,
+                photoURL,
+                ...additionalData
+            })
+        } catch(error) {
+            console.log(error)
+        }
+    }
+    return getUserDocument(user.uid)
+}
+
+export const getUserDocument = async uid => {
+    if(!uid) return;
+    try {
+        const userDocument = await filestore.doc(`users/${uid}`).get()
+        return {
+            uid,
+            ...userDocument.data()
+        }
+    } catch(error) {
+        console.log(error)
+    }
+}
+>>>>>>> e50faff93e123e936baff432203054297e20637c

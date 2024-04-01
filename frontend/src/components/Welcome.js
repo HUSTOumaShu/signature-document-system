@@ -9,6 +9,13 @@ const HomePage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+<<<<<<< HEAD
+=======
+    useEffect(() => {
+        dispatch()
+    }, [dispatch])
+
+>>>>>>> e50faff93e123e936baff432203054297e20637c
     return (
         <div>
             <ProfilePage />
