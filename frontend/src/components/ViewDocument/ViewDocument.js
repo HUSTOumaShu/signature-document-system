@@ -1,38 +1,43 @@
 import { useEffect, useRef } from 'react';
 import WebViewer from '@pdftron/webviewer';
+import { useSelector } from 'react-redux';
+import { selectDocToView } from './ViewDocumentSlice';
 
 const ViewDocument = () => {
+    const [instance, setInstance] = useState(null);
+
+    const doc = useSelector(selectDocToView);
+    const {docRef, searchTerm, pageNumber} = doc;
+
     const viewer = useRef(null);
 
     useEffect(() => {
         WebViewer(
             {
-                path: '/webviewer/lib',
+                path: '/webviewer/',
                 licenseKey:
                     'demo:1711275376590:7f0c56cd030000000060525107bc85911c3dfb4a55f44d650263ca8942',
-                initialDoc: '/files/sdms_system.pdf',
             },
             viewer.current,
         ).then(async (instance) => {
-            const { documentViewer, annotationManager, Annotations } =
-                instance.Core;
+            setInstance(instance);
+            const {documentViewer, Search} = instance.Core;
 
-            documentViewer.addEventListener('documentLoaded', () => {
-                const reactangleAnnot = new Annotations.RectangleAnnotation({
-                    PageNumber: 1,
-                    X: 100,
-                    Y: 150,
-                    Width: 200,
-                    Height: 50,
-                    Author: annotationManager.getCurrentUser(),
-                });
+            // load document
+            const storageRef = storage.ref();
+            const URL = await storageRef.child(docRef).getDownloadURL();
+            documentViewer.loadDocument(URL);
 
-                annotationManager.addAnnotation(reactangleAnnot);
-                annotationManager.redrawAnnotation(reactangleAnnot);
+            // search
+            documentViewer.addEventListener('documentLoaded', async () => {
+                if(searchTerm){
+
+                } else if(pageNumber){
+                    documentViewer.setCurrentPage(pageNumber);
+                }
             });
-        });
-    }, []);
-
+        }, []);
+    });
     return (
         <div className="MyComponent">
             <div className="header">Sample</div>
