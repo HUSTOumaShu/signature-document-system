@@ -1,57 +1,28 @@
 import React from 'react';
-<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Box, Button, Column, Heading, Link, Text } from 'gestalt';
 import { auth } from '../../firebase/firebase';
+import { getUserDocument } from '../../app/user';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../firebase/firebaseSlice';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const user = auth.currentUser;
-    const email = user.email || "";
-    const displayName = user.displayName || "";
-    const photoURL = user.photoURL || "";
-=======
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { selectUser, setUser } from '../../firebase/firebaseSlice';
-import { Avatar, Box, Button, Column, Heading, Link, Text } from 'gestalt';
-import { getAuth } from 'firebase/auth';
-import { firebase } from '../../firebase/firebase';
-
-const ProfilePage = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const user = useSelector(selectUser);
-    const { email} = user;
-    const auth = getAuth(firebase)
->>>>>>> e50faff93e123e936baff432203054297e20637c
+    const user = auth.currentUser
+    console.log(user)
 
     return (
         <Box display='flex' direction='row' paddingY={2} color={'lightgrey'}>
-            <Column span={9}>
-                <Box padding={3}>
-                    <Link to='/' className='profileLink'><Heading size='lg'>PDFTron Sign App</Heading></Link>
-                </Box>
-            </Column>
-            <Column span={3}>
+            <Column span={10}>
                 <Box padding={1}>
-<<<<<<< HEAD
-                    <Avatar name={displayName} size='md' src={photoURL} />
+                    <Avatar name='photoURL' size='md' src={user.photoURL} />
                 </Box>
-                <Text weight='bold'>{displayName}</Text>
-=======
-                    <Avatar size='md' />
-                </Box>
-                <Text weight='bold'>{}</Text>
->>>>>>> e50faff93e123e936baff432203054297e20637c
-                <Text>{email}</Text>
+                <Text weight='bold'>{user.displayName}</Text>
+            </Column>
+            <Column span={2}>
                 <Box padding={1}>
                     <Button onClick={() => {
                         auth.signOut();
-<<<<<<< HEAD
-=======
-                        dispatch(setUser(null));
->>>>>>> e50faff93e123e936baff432203054297e20637c
                         navigate(`/`);
                     }}
                     accessibilityLabel='Sigout from your account'

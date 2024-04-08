@@ -1,12 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
-const path = require('path');
 const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
 
 const fs = require('fs');
 const {PDFNet} = require('@pdftron/pdfnet-node');
 const cors = require('cors');
+const route = require('./routes/index')
 
 require('dotenv').config()
 
@@ -22,32 +21,9 @@ app.use(
 app.use(morgan('combined'))
 
 const db = require('./config/database');
-const Account = require('./app/models/Account');
 db.connect();
 
-app.get('/', cors(), (req, res) => {
-
-})
-
-app.post('/signup', async (req, res) => {
-    const {email, password} = req.body;
-    const data = {
-        email: email,
-        password: password
-    }
-    try {
-        const check = await Account.findOne({email: email});
-        if(check) {
-            res.json("Email exists")
-        }
-        else {
-            res.json("Email does not exist")
-            await Account.insertMany(data);
-        }
-    } catch (error) {
-        console.log(error);
-    }
-})
+route(app);
 
 app.get('/', (req, res) => {
     console.log(req.query)

@@ -18,17 +18,6 @@ const ViewDocument = () => {
                 instance.Core;
 
             documentViewer.addEventListener('documentLoaded', () => {
-                const reactangleAnnot = new Annotations.RectangleAnnotation({
-                    PageNumber: 1,
-                    X: 100,
-                    Y: 150,
-                    Width: 200,
-                    Height: 50,
-                    Author: annotationManager.getCurrentUser(),
-                });
-
-                annotationManager.addAnnotation(reactangleAnnot);
-                annotationManager.redrawAnnotation(reactangleAnnot);
             });
         });
     }, []);

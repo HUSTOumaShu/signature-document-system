@@ -4,21 +4,22 @@
   "private": true,
   "dependencies": {
     "@pdftron/webviewer": "^10.8.0",
+    "@popperjs/core": "^2.11.8",
     "@reduxjs/toolkit": "^2.2.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
-<<<<<<< HEAD
+    "bootstrap": "^5.3.3",
     "boxicons": "^2.1.4",
-=======
->>>>>>> e50faff93e123e936baff432203054297e20637c
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "firebase": "^10.10.0",
     "fs-extra": "^11.2.0",
     "gestalt": "^146.5.13",
+    "gestalt-design-tokens": "^146.5.15",
     "mongoose": "^8.2.3",
+    "popper.js": "^1.16.1",
     "prettier": "^3.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

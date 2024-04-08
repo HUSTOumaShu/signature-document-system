@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { getUserDocument } from '../app/user';
 
 export const firebaseSlice = createSlice({
   name: 'firebase',
@@ -14,6 +15,6 @@ export const firebaseSlice = createSlice({
 
 export const { setUser } = firebaseSlice.actions;
 
-export const selectUser = state => state.firebase.setUser;
+export const selectUser = state => state.firebase.user;
 
 export default firebaseSlice.reducer;

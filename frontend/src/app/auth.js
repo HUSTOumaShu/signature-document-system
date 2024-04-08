@@ -10,7 +10,7 @@ import {
     GoogleAuthProvider, 
 } from "firebase/auth";
 import { auth } from "../firebase/firebase";
-import { generateUserDocument } from "./document";
+import { addUser, generateUserDocument, getUser } from "./user";
 
 export const userDelete = () => {
     deleteUser(auth.currentUser)
@@ -40,7 +40,6 @@ export const handleAuthState = (setAuth) => {
             setAuth(true)
         } else {
             setAuth(false)
-            console.log(user)
         }
     })
 }
@@ -49,12 +48,16 @@ export const logout = () => {
     signOut(auth)
 }
 
-export const signUp = (email, password) => {
+export const signUp = (email, password, displayName) => {
     createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-        generateUserDocument(userCredential.user)
-        generateUserDocument(userCredential.user, {displayName: "New User"})
-        console.log(userCredential.user)
+        addUser({
+            "uid": userCredential.user.uid,
+            "email": email,
+            "displayName": displayName,
+            "photoURL": "",
+        })
+        console.log(displayName)
     })
     .catch((error) => {
         if(error.code === AuthErrorCodes.INVALID_PASSWORD ||
@@ -70,7 +73,8 @@ export const signUp = (email, password) => {
 export const signIn = (email, password) => {
     signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-        console.log(userCredential.user)
+        const user = userCredential.user
+        console.log(user)
     })
     .catch((error) => { 
         console.log(error.code)

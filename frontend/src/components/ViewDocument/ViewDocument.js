@@ -4,43 +4,41 @@ import { useSelector } from 'react-redux';
 import { selectDocToView } from './ViewDocumentSlice';
 
 const ViewDocument = () => {
-    const [instance, setInstance] = useState(null);
-
-    const doc = useSelector(selectDocToView);
-    const {docRef, searchTerm, pageNumber} = doc;
-
     const viewer = useRef(null);
 
     useEffect(() => {
         WebViewer(
             {
-                path: '/webviewer/',
+                fullAPI: true,
+                path: '/webviewer/lib',
                 licenseKey:
                     'demo:1711275376590:7f0c56cd030000000060525107bc85911c3dfb4a55f44d650263ca8942',
+                initialDoc: '/files/sdms_system.pdf',
             },
             viewer.current,
-        ).then(async (instance) => {
-            setInstance(instance);
-            const {documentViewer, Search} = instance.Core;
+            ).then(instance => {
+                const {PDFNet, documentViewer} = instance.Core;
 
-            // load document
-            const storageRef = storage.ref();
-            const URL = await storageRef.child(docRef).getDownloadURL();
-            documentViewer.loadDocument(URL);
+                documentViewer.addEventListener('documentLoaded', async () => {
+                    await PDFNet.initialize();
+                    const doc = documentViewer.getDocument().getPDFDoc();
 
-            // search
-            documentViewer.addEventListener('documentLoaded', async () => {
-                if(searchTerm){
+                    await PDFNet.runWithCleanup(async() => {
 
-                } else if(pageNumber){
-                    documentViewer.setCurrentPage(pageNumber);
-                }
-            });
-        }, []);
+                        // Find certificate field
+                        const foundCertificationField = await (await doc).getField('SignatureFormField 1');
+                        const certificateSigField = await PDFNet.DigitalSignatureField.createFromField(foundCertificationField);
+
+                        await certificateSigField.signOnNextSaveFromURL('/files/ESPSigner.pfx', 'ejbca');
+                        const docBuf = (await doc).saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental);
+                        return docBuf;
+                    })
+                })
+                
+            }, []);
     });
     return (
         <div className="MyComponent">
-            <div className="header">Sample</div>
             <div
                 className="webviewer"
                 ref={viewer}
