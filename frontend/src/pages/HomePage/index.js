@@ -1,11 +1,14 @@
-import Header from "../../components/Header"
+import Content from "../../components/Content"
+import Profile from "../../components/Profile"
+import SideBar from "../../components/Sidebar"
+import './index.css'
 
 const HomePage = () => {
     return (
-        <div>
-            <Header />
-            <div className="container" style={{padding: "4px"}}>
-                <h1>Home Page</h1>
+        <div className="dashboard">
+            <SideBar />
+            <div className="dashboard-content">
+                <Content />
             </div>
         </div>
     )

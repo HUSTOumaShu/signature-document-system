@@ -6,10 +6,14 @@ const Schema = mongoose.Schema;
 
 const User = new Schema(
     {
-        uid: {type: String, required: true},
         email: {type: String, required: true},
         displayName: {type: String, required: true},
-        photoURL: {type: String, required: false},
+        phone: {type: String},
+        dateOfBirth: {type: Date},
+        gender: {type: String},
+        address: {type: String},
+        organizationCode: {type: String},
+        role: {type: String, default: 'user'},
     },
     {
         timestamps: true,

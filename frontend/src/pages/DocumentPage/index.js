@@ -1,9 +1,7 @@
-import Header from "../../components/Header"
 
 const DocumentPage = () => {
     return (
         <div>
-            <Header />
             <h1>Document Management</h1>
             <div className="container" style={{padding: "4px"}}>
                 <nav>
