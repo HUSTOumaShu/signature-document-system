@@ -12,7 +12,7 @@ const User = new Schema(
         dateOfBirth: {type: Date},
         gender: {type: String},
         address: {type: String},
-        organizationCode: {type: String},
+        organizationCode: {type: Array, default: []},
         role: {type: String, default: 'user'},
     },
     {

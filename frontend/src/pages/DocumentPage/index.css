@@ -1,0 +1,13 @@
+.document-page {
+    display: flex;
+    gap: 20px;
+}
+.document-content {
+    background-color: #fff;
+    flex: 1;
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    gap: 1.5rem;
+}

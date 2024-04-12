@@ -8,7 +8,7 @@ const Header = ({title}) => {
             <h1 className="header--title">{title}</h1>
             <div className="header--activity">
                 <div className="search-box">
-                    <input type="text" placeholder="Search document..." />
+                    <input type="text" placeholder="Search..." />
                     <BiSearch id="search-icon" />
                 </div>
                 <div className="notify">

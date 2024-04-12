@@ -1,0 +1,29 @@
+.prepare-page {
+    display: flex;
+    gap: 20px;
+}
+
+.prepare-content {
+    background-color: #fff;
+    flex: 1;
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.prepare-add-recipent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.btn-add-recipent {
+    width: fit-content;
+}

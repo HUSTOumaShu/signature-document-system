@@ -1,5 +1,4 @@
 import Content from "../../components/Content"
-import Profile from "../../components/Profile"
 import SideBar from "../../components/Sidebar"
 import './index.css'
 

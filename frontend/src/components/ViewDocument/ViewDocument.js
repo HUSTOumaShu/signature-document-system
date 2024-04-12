@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react';
 import WebViewer from '@pdftron/webviewer';
-import { useSelector } from 'react-redux';
-import { selectDocToView } from './ViewDocumentSlice';
 
 const ViewDocument = () => {
     const viewer = useRef(null);

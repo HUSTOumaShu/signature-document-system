@@ -2,7 +2,7 @@ const User = require('../models/User');
 const {mongooseToObject, multipleMongooseToObject} = require('../../util/mongoose');
 
 class UserController {
-
+    // [GET] /users
     showAll(req, res, next) {
         User.find({})
         .then(users => {

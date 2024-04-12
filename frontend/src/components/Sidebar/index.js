@@ -15,23 +15,34 @@ const SideBar = () => {
         </div>
 
         <div className="menu--list">
-            <a href="#" className="item">
+            <a href="/" className="item">
                 <BiHome fontSize='1.4rem' />
                 Dashboard
             </a>
-            <a href="#" className="item">
+            <a href="/prepare" className="item">
                 <IoCreateOutline fontSize='1.4rem' />
                 Create Document
             </a>
-            <a href="#" className="item">
-                <CgFileDocument fontSize='1.4rem' />
-                Manage Document
-            </a>
+
+            <div class="dropdown">
+                <a class="btn dropdown-toggle item" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <CgFileDocument fontSize='1.4rem' />
+                    Manage Documents
+                </a>
+
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item item" href="/document/inbox">Inbox</a></li>
+                    <li><a class="dropdown-item item" href="/document/sent">Sent</a></li>
+                    <li><a class="dropdown-item item" href="/document/draft">Draft</a></li>
+                    <li><a class="dropdown-item item" href="/document/deleted">Deleted</a></li>
+                </ul>
+            </div>
+            
             <a href="#" className="item">
                 <CgTemplate fontSize='1.4rem' />
                 Manage Templates
             </a>
-            <a href="#" className="item">
+            <a href="/users" className="item">
                 <AiOutlineUser fontSize='1.4rem' />
                 Manage Users
             </a>

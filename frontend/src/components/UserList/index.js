@@ -3,7 +3,7 @@ import { HiInformationCircle } from 'react-icons/hi'
 import { AiFillDelete, AiOutlineCloudDownload } from 'react-icons/ai'
 import './index.css'
 
-const documents = [
+const users = [
     {
         title: 'Title',
         from: 'From',
@@ -20,11 +20,11 @@ const documents = [
     },
 ]
 
-const DocumentList = ({docType}) => {
+const UserList = () => {
     return (
-        <div className='document--list'>
+        <div className='user--list'>
             <div className='list--header'>
-                <h2>{docType}</h2>
+                <h2></h2>
                 <select>
                     <option value='completed'>Completed</option>
                     <option value='processing'>Processing</option>
@@ -40,18 +40,18 @@ const DocumentList = ({docType}) => {
                         <th className='col-3' scope='col'>Action</th>
                     </thead>
                     <tbody>
-                        {documents.map((document, index) => (
+                        {users.map((user, index) => (
                             <tr>
                                 <td>{index + 1}</td>
                                 <td>
-                                    <strong>{document.title}</strong> <br />
-                                    From: {document.from} <br />
+                                    <strong>{user.title}</strong> <br />
+                                    From: {user.from} <br />
                                     To: {document.to}
                                 </td>
-                                <td>{document.status}</td>
-                                <td>{document.lastChange}</td>
+                                <td>{user.status}</td>
+                                <td>{user.lastChange}</td>
                                 <td style={{margin: '4px'}}>
-                                    {document.status === 'Processing' ? (
+                                    {user.status === 'Processing' ? (
                                         <a href='#' className='btn btn-outline-success' title='Sign Now'>
                                             <FaSignature />
                                         </a>
@@ -76,4 +76,4 @@ const DocumentList = ({docType}) => {
     )
 }
 
-export default DocumentList;
+export default UserList;
