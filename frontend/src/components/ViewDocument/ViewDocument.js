@@ -29,6 +29,7 @@ const ViewDocument = () => {
 
                         await certificateSigField.signOnNextSaveFromURL('/files/ESPSigner.pfx', 'ejbca');
                         const docBuf = (await doc).saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental);
+                        console.log('Document signed and saved', docBuf);
                         return docBuf;
                     })
                 })

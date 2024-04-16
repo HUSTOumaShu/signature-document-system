@@ -1,8 +1,10 @@
 import {configureStore} from '@reduxjs/toolkit';
-import firebaseReducer from '../firebase/firebaseSlice';
+import { rootReducer } from './reducers';
 
-export default configureStore({
+const store = configureStore({
     reducer: {
-        firebase: firebaseReducer,
+        data: rootReducer
     }
 })
+
+export default store

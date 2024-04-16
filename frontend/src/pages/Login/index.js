@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { signIn, signInWithGoogle } from "../../app/auth"
+import { loginWithEmailAndPassword, loginWithGoogle } from "../../app/auth"
 import './index.css'
 
 const Login = () => {
@@ -10,7 +10,7 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        signIn(email, password)
+        loginWithEmailAndPassword(email, password)
         navigate('/', {state: {email: email}})
     }
 
@@ -59,7 +59,7 @@ const Login = () => {
                             <hr className="my-4" />
 
                             <button className="btn btn-lg btn-block btn-primary" style={{backgroundColor: "#dd4b39"}} 
-                                onClick={signInWithGoogle}
+                                onClick={loginWithGoogle}
                             ><i className="fab fa-google me-2"></i> Sign in with google</button>
 
                             <div>

@@ -1,97 +1,128 @@
-import { 
-    deleteUser, 
-    updateProfile, 
-    onAuthStateChanged, 
-    signOut, 
-    AuthErrorCodes,
-    createUserWithEmailAndPassword, 
+import { createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
-    signInWithPopup,
     GoogleAuthProvider, 
-} from "firebase/auth";
-import { auth } from "../firebase/firebase";
-import { addUser, generateUserDocument, getUser } from "./user";
+    signInWithPopup, 
+    sendPasswordResetEmail,
+    signOut,
+    updatePassword,
+    updateProfile,
+    updateEmail,
+    sendEmailVerification
+} from 'firebase/auth'
+import { auth } from '../firebase/firebase';
 
-export const userDelete = () => {
-    deleteUser(auth.currentUser)
-    .then(() => {
-        alert("User deleted successfully!")
-    })
-    .catch((error) => {
-        console.log(error)
-    })
-}
-
-export const profileUpdate = (displayName) => {
-    updateProfile(auth.currentUser, {
-        displayName,
-    })
-    .then(() => {
-        alert("Profile updated successfully!")
-    })
-    .catch((error) => {
-        console.log(error)
-    })
-}
-
-export const handleAuthState = (setAuth) => {
-    onAuthStateChanged(auth, (user) => {
-        if(user) {
-            setAuth(true)
-        } else {
-            setAuth(false)
-        }
-    })
-}
-
-export const logout = () => {
-    signOut(auth)
-}
-
-export const signUp = (email, password, displayName) => {
+// Login, signup, and logout functions
+export const signup = async (email, password) => {
     createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-        addUser({
-            "uid": userCredential.user.uid,
-            "email": email,
-            "displayName": displayName,
-            "photoURL": "",
+        .then((userCredential) => {
+            const user = userCredential.user;
+            console.log(user)
         })
-        console.log(displayName)
-    })
-    .catch((error) => {
-        if(error.code === AuthErrorCodes.INVALID_PASSWORD ||
-            error.code === AuthErrorCodes.USER_DELETED) {
-            alert("Invalid email or password!")
-        } else {
-            console.log(error.code)
-            alert(error.code)
-        }
-    })
+        .catch((error) => {
+            const errorMessage = error.message;
+            alert(errorMessage)
+        })
 }
 
-export const signIn = (email, password) => {
+export const loginWithEmailAndPassword = async (email, password) => {
+    console.log(email, password, auth)
     signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-        const user = userCredential.user
-        console.log(user)
-    })
-    .catch((error) => { 
-        console.log(error.code)
-        alert(error.code)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            console.log(user)
+        })
+        .catch((error) => {
+            const errorMessage = error.message;
+            alert(errorMessage)
+        })
+}
+
+export const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider()
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            const credential = GoogleAuthProvider.credentialFromResult(result)
+            const token = credential.accessToken
+            const user = result.user
+            console.log(user, token)
+        })
+        .catch((error) => {
+            const errorMessage = error.message;
+            alert(error.message)
+        })
+}
+
+export const signout = async () => {
+    signOut(auth).then(() => console.log('Signed out successfully'))
+    .catch((error) => {
+        console.error(error)
     })
 }
 
-export const signInWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-    .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result)
-        const user = credential.user
-        console.log(user)
+export const resetPassword = async (email) => {
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            console.log('Password reset email sent')
+        })
+        .catch((error) => {
+            const errorMessage = error.message;
+            alert(errorMessage)
+        })
+}
+
+export const update_password = async (password) => {
+    updatePassword(auth.currentUser, password)
+        .then(() => {
+            console.log('Password updated successfully')
+        })
+        .catch((error) => {
+            console.error(error)
+        }
+    )
+}
+
+// User profile functions
+export const getUserProfile = async () => {
+    const user = auth.currentUser
+    if(user !== null) {
+        const data = {
+            uid: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            emailVerified: user.emailVerified,
+        }
+        return data;
+    }
+}
+
+export const update_profile = async (name, photoURL) => {
+    updateProfile(auth.currentUser, {
+        displayName: name,
+        photoURL: photoURL
+    }).then(() => {
+        console.log('Profile updated successfully')
+    }).catch((error) => {
+        console.error(error)
     })
-    .catch((error) => {
-        console.log(error.code)
-        alert(error.code)
-    })
+}
+
+export const update_email = async (email) => {
+    updateEmail(auth.currentUser, email)
+        .then(() => {
+            console.log('Email updated successfully')
+        })
+        .catch((error) => {
+            console.error(error)
+        })
+}
+
+export const sendVerification = async () => {
+    sendEmailVerification(auth.currentUser)
+        .then(() => {
+            console.log('Email verification sent')
+        })
+        .catch((error) => {
+            console.error(error)
+        })
 }

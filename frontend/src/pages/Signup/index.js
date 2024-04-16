@@ -1,17 +1,32 @@
 import { Box, Button, Container, Heading, Text, TextField } from "gestalt"
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { signInWithGoogle, signUp } from "../../app/auth"
+import { loginWithGoogle } from "../../app/auth"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { auth } from "../../firebase/firebase"
+import { useNavigate } from "react-router-dom"
 
 const Signup = () => {
 
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
     
     const handleSubmit = (e) => {
         e.preventDefault()
-        signUp(email, password, displayName)
+        createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user
+            updateProfile(user, {
+                displayName: displayName
+            })
+        })
+        .catch((error) => {
+            const errorMessage = error.message
+            alert(errorMessage)
+        })
+        navigate('/login')
     }
 
     return (
@@ -56,7 +71,7 @@ const Signup = () => {
         
                 <Box padding={2}><Text>or</Text></Box>
                 <Box padding={2}>
-                    <Button onClick={signInWithGoogle} text="Sign in with Google" color="red" inline />
+                    <Button onClick={loginWithGoogle} text="Sign in with Google" color="red" inline />
                 </Box>
                 <Box padding={2}><Text>Already have an account?</Text></Box>
                 <Box padding={2}>

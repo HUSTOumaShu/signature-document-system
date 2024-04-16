@@ -63,7 +63,7 @@ const PrepareDocument = () => {
                 <div className="button-group">
                     <button type="button" class="btn btn-danger">Discard</button>
                     <button type="button" class="btn btn-warning">Save to Draft</button>
-                    <button type="button" class="btn btn-success">Next</button>
+                    <a href="/viewDocument" type="button" class="btn btn-success">Next</a>
                 </div>
             </div>
         </div>

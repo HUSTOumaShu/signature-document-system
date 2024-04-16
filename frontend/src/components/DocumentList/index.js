@@ -33,15 +33,17 @@ const DocumentList = ({docType}) => {
             <div className='list--container'>
                 <table class="table table-light table-striped table-document">
                     <thead>
-                        <th className='col-1' scope='col'>STT</th>
-                        <th className='col-5' scope='col'>Subject</th>
-                        <th className='col-2' scope='col'>Status</th>
-                        <th className='col-2' scope='col'>Last Change</th>
-                        <th className='col-3' scope='col'>Action</th>
+                        <tr>
+                            <th className='col-1' scope='col'>STT</th>
+                            <th className='col-5' scope='col'>Subject</th>
+                            <th className='col-2' scope='col'>Status</th>
+                            <th className='col-2' scope='col'>Last Change</th>
+                            <th className='col-3' scope='col'>Action</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {documents.map((document, index) => (
-                            <tr>
+                            <tr key={index+1}>
                                 <td>{index + 1}</td>
                                 <td>
                                     <strong>{document.title}</strong> <br />
