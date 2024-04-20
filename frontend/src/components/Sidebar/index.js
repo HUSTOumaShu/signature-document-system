@@ -25,7 +25,7 @@ const SideBar = () => {
             </a>
 
             <div class="dropdown">
-                <a class="btn dropdown-toggle item" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="btn dropdown-toggle item" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <CgFileDocument fontSize='1.4rem' />
                     Manage Documents
                 </a>

@@ -24,7 +24,7 @@ const UserList = () => {
     return (
         <div className='user--list'>
             <div className='list--header'>
-                <h2></h2>
+                <h2>User List</h2>
                 <select>
                     <option value='completed'>Completed</option>
                     <option value='processing'>Processing</option>

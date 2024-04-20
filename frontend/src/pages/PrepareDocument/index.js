@@ -1,22 +1,29 @@
+import React, { useState } from "react"
 import SideBar from "../../components/Sidebar"
-import { AiFillDelete } from 'react-icons/ai'
 import './index.css'
+import { useDispatch, useSelector } from "react-redux";
+import { addSignee } from "../../app/features/assignSlice";
+import {Toast} from 'gestalt'
 
 const PrepareDocument = () => {
+    const [email, setEmail] = useState('');
+    const [displayName, setDisplayName] = useState('');
+    const [showToast, setShowToast] = useState(false);
 
-    const addRepicent = () => {
-        const recipent = `
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Name" aria-label="Name" />
-                <span class="input-group-text">@</span>
-                <input type="email" class="form-control" placeholder="Email" aria-label="Email" />
-                <button className='btn btn-outline-danger' title='Delete'>
-                    Delete
-                </button>
-            </div>
-        `
-        document.getElementsByClassName('prepare-add-recipent')[0].innerHTML += recipent    
+    const dispatch = useDispatch()
+    const assignees = useSelector(state => state.data.assign.signees)
+
+    const addRepicent = (name, email) => {
+        const key = `${new Date().getTime()}${email}`
+        if(name !== '' && email !== '') {
+            console.log('add recipent', name, email, key)
+            dispatch(addSignee({key, name, email}))
+            setDisplayName('')
+            setEmail('')
+        }
     }
+
+    console.log(assignees)
 
     return (
         <div className="prepare-page">
@@ -38,16 +45,46 @@ const PrepareDocument = () => {
                     </div>
 
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Name" aria-label="Name" />
+                        <input 
+                            type="text"
+                            class="form-control" 
+                            placeholder="Name" 
+                            aria-label="Name"
+                            id="displayName"
+                            onChange={event => setDisplayName(event.target.value)}
+                            value={displayName} />
                         <span class="input-group-text">@</span>
-                        <input type="email" class="form-control" placeholder="Email" aria-label="Email" />
-                        <button className='btn btn-outline-danger' title='Delete'>
-                            <AiFillDelete />
-                        </button>
+                        <input 
+                            type="email" 
+                            class="form-control" 
+                            placeholder="Email" 
+                            aria-label="Email"
+                            id="email"
+                            onChange={event => setEmail(event.target.value)}
+                            value={email} />
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary btn-add-recipent" onClick={addRepicent}>Add recipent</button>
+                <button type="button" class="btn btn-primary btn-add-recipent" onClick={() => {
+                    addRepicent(displayName, email)
+                }}>Add recipent</button>
+
+                <table class="table recipents">
+                    <thead>
+                        <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {assignees?.map((user) => (
+                            <tr key={user.key}>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
                 
                 <div className="prepare-add-message">
                     <h1>Add Message</h1>
@@ -65,6 +102,22 @@ const PrepareDocument = () => {
                     <button type="button" class="btn btn-warning">Save to Draft</button>
                     <a href="/viewDocument" type="button" class="btn btn-success">Next</a>
                 </div>
+
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                    <img src="..." class="rounded me-2" alt="..." />
+                    <strong class="me-auto">Alert</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        Please add at least one recipent
+                    </div>
+                </div>
+            </div>
+
+            <Toast color="red" show={showToast} text="Please add at least one recipent" />
+
             </div>
         </div>
     )

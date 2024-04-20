@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { loginWithEmailAndPassword, loginWithGoogle } from "../../app/auth"
+import { AiFillGoogleCircle } from "react-icons/ai"
 import './index.css'
 
 const Login = () => {
@@ -59,11 +60,19 @@ const Login = () => {
                             <hr className="my-4" />
 
                             <button className="btn btn-lg btn-block btn-primary" style={{backgroundColor: "#dd4b39"}} 
-                                onClick={loginWithGoogle}
-                            ><i className="fab fa-google me-2"></i> Sign in with google</button>
-
+                                onClick={() => {
+                                    loginWithGoogle()
+                                    navigate('/')
+                                }}
+                            >Sign in with google <AiFillGoogleCircle /></button>
+                            
                             <div>
                                 <p className="mb-0">Don't have an account? <a href="/signup" className="text-blue-50 fw-bold">Sign Up</a>
+                                </p>
+                            </div>
+
+                            <div>
+                                <p className="mb-0">Forgot your Password? <a href="/resetPassword" className="text-blue-50 fw-bold">Reset Password</a>
                                 </p>
                             </div>
 

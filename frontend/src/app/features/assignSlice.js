@@ -9,6 +9,7 @@ export const assignSlice = createSlice({
     initialState,
     reducers: {
         addSignee: (state, action) => {
+            console.log('addSignee', action.payload)
             state.signees = [...state.signees, {
                 key: action.payload.key,
                 name: action.payload.name,

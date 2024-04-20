@@ -1,9 +1,10 @@
 .profile {
     display: flex;
-    flex-direction: row;
 }
 
-.profile__header {
+.user_info {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    margin: 4px;
 }

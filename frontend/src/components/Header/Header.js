@@ -4,7 +4,6 @@ import './index.css'
 import Profile from "../Profile"
 
 const Header = ({title}) => {
-    const navigate = useNavigate()
     return (
         <div className="content--header">
             <h1 className="header--title">{title}</h1>
