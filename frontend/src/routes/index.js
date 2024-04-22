@@ -4,12 +4,13 @@ import InboxPage from '../pages/DocumentPage/InboxPage';
 import SentPage from '../pages/DocumentPage/SentPage';
 import DraftPage from '../pages/DocumentPage/DraftPage';
 import DeletedPage from '../pages/DocumentPage/DeletedPage';
-import PrepareDocument from '../pages/PrepareDocument';
+import Assign from '../pages/Assign';
 import ViewDocument from '../pages/ViewDocument';
 import UserPage from '../pages/UserPage';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import PasswordReset from '../pages/PasswordReset';
+import PrepareDocument from '../pages/PrepareDocument';
 
 export const publicRoutes = [
     {
@@ -31,6 +32,10 @@ export const publicRoutes = [
     {
         path: '/document/deleted',
         element: <DeletedPage />
+    },
+    {
+        path: '/assign',
+        element: <Assign />
     },
     {
         path: '/prepare',

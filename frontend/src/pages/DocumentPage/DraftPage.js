@@ -9,7 +9,7 @@ const DraftPage = () => {
             <SideBar />
             <div className="document-content">
                 <Header title="Document" />
-                <DocumentList docType="Draft" />
+                <DocumentList docType="Draft" documents={null} />
             </div>
         </div>
     )

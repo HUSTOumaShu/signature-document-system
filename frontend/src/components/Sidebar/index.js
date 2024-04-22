@@ -19,7 +19,7 @@ const SideBar = () => {
                 <BiHome fontSize='1.4rem' />
                 Dashboard
             </a>
-            <a href="/prepare" className="item">
+            <a href="/assign" className="item">
                 <IoCreateOutline fontSize='1.4rem' />
                 Create Document
             </a>

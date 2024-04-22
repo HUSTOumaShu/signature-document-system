@@ -3,24 +3,7 @@ import { HiInformationCircle } from 'react-icons/hi'
 import { AiFillDelete, AiOutlineCloudDownload } from 'react-icons/ai'
 import './index.css'
 
-const documents = [
-    {
-        title: 'Title',
-        from: 'From',
-        to: 'To',
-        status: 'Successed',
-        lastChange: '2/2/2022',
-    },
-    {
-        title: 'Title',
-        from: 'From',
-        to: 'To',
-        status: 'Processing',
-        lastChange: '2/2/2022',
-    },
-]
-
-const DocumentList = ({docType}) => {
+const DocumentList = ({docType, documents}) => {
     return (
         <div className='document--list'>
             <div className='list--header'>
@@ -42,7 +25,7 @@ const DocumentList = ({docType}) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {documents.map((document, index) => (
+                        {documents?.map((document, index) => (
                             <tr key={index+1}>
                                 <td>{index + 1}</td>
                                 <td>
