@@ -44,7 +44,7 @@ const Assign = () => {
                 <div className="assign-add-document">
                     <h1>Add Document</h1>
                     <div style={{borderBottom: 'solid 1px #000'}}>
-                        <input class="form-control form-control-lg" id="formFileLg" type="file" multiple />
+                        <input class="form-control form-control-lg" id="formFileLg" type="file" />
                     </div>
                 </div>
                 <div className="assign-add-recipent">

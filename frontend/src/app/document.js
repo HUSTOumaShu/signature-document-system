@@ -2,25 +2,26 @@ import { addDoc, collection, getDoc, getDocs, query, updateDoc, where } from "fi
 import { filestore } from "../firebase/firebase";
 import { mergeAnnotations } from "./documentStorage";
 
-export const addDocumentToSign = async (uid, email, docRef, emails) => {
+export const addDocumentToSign = async (uid, email, reference, emails) => {
     if(!uid) return;
     const signed = false;
     const xfdf = [];
     const signedBy = [];
     const requestedTime = new Date()
     const signedTime = '';
+    console.log('addDocumentToSign', uid, email, reference, emails)
     try {
         const docRef = await addDoc(collection(filestore, 'documentsToSign'), {
-            uid,
-            email,
-            docRef,
-            emails,
-            signed,
-            xfdf,
-            signedBy,
-            signed,
-            requestedTime,
-            signedTime
+            uid: uid,
+            email: email,
+            reference: reference,
+            emails: emails,
+            signed: signed,
+            xfdf: xfdf,
+            signedBy: signedBy,
+            signed: signed,
+            requestedTime: requestedTime,
+            signedTime: signedTime
         });
         console.log('Document written with ID: ', docRef.id);
     } catch(e) {

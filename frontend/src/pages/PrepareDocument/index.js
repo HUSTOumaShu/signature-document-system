@@ -9,6 +9,7 @@ import {resetSignee} from '../../app/features/assignSlice'
 import { FaSignature } from 'react-icons/fa'
 import { BsCalendar2DateFill } from 'react-icons/bs'
 import { BsFillSendArrowUpFill } from 'react-icons/bs'
+import { ref, uploadBytes } from 'firebase/storage'
 
 const PrepareDocument = () => {
     const [instance, setInstance] = useState(null)
@@ -18,23 +19,23 @@ const PrepareDocument = () => {
     const navigate = useNavigate()
 
     const assignees = useSelector(state => state.data.assign.signees)
-    console.log(assignees)
     const assigneesValues = assignees?.map(assignee => {
         return {value: assignee.email, label: assignee.name}
     })
-    console.log(assigneesValues)
     let initialAssignee = assigneesValues?.length > 0 ? assigneesValues[0].value : ''
     const [assignee, setAssignee] = useState(initialAssignee)
 
     const user = useSelector(state => state.data.user.user)
     const viewer = useRef(null)
     const filePicker = useRef(null)
-    console.log(instance)
 
     useEffect(() => {
         WebViewer(
             {
+                fullAPI: true,
                 path: '/webviewer/lib',
+                licenseKey:
+                    'demo:1711275376590:7f0c56cd030000000060525107bc85911c3dfb4a55f44d650263ca8942',
                 disabledElements: [
                     'ribbons',
                     'toggleNotesButton',
@@ -42,30 +43,32 @@ const PrepareDocument = () => {
                     'menuButton',
                 ],
             },
-            viewer.current
-        ).then((instance) => {
-            setInstance(instance)
-            const {iframeWindow} = instance.UI
-            instance.UI.setToolbarGroup('toolbarGroup-View')
+            viewer.current,
+            ).then(instance => {
+                const {iframeWindow} = instance.UI;
+                instance.UI.setToolbarGroup('toolbarGroup-View')
+                setInstance(instance)
 
-            const iframeDoc = iframeWindow?.document.body;
-            iframeDoc.addEventListener('dragover', dragOver)
-            iframeDoc.addEventListener('drop', (e) => drop(e, instance))
-            
-            filePicker.current.onChange = (e) => {
-                const file = e.target.files[0]
-                if(file) {
-                    instance.UI.loadDocument(file)
-                }
-            }
-        })
+                const iframeDoc = iframeWindow?.document.body;
+                iframeDoc.addEventListener('dragover', dragOver)
+                iframeDoc.addEventListener('drop', (e) => {
+                    drop(e, instance)
+                })
+
+                filePicker.current.addEventListener('change', (e) => {
+                    const file = e.target.files[0]
+                    if(file) {
+                        instance.UI.loadDocument(file)
+                    }
+                })
+            }, []);
     }, [])
 
     const applyFields = async () => {
         const { Annotations, documentViewer } = instance.Core
         const annotationManager = documentViewer.getAnnotationManager()
         const fieldManager = annotationManager.getFieldManager()
-        const annotationList = annotationManager.getAnnotationList()
+        const annotationList = annotationManager.getAnnotationsList()
         const annotsToDelete = []
         const annotsToDraw = []
         
@@ -171,7 +174,7 @@ const PrepareDocument = () => {
         const page_idx = page.first !== null ? page.first : documentViewer.getCurrentPage()
         const page_info = doc.getPageInfo(page_idx)
         const page_point = displayMode.windowToPage(point, page_idx)
-        const zoom = documentViewer.getZoom()
+        const zoom = documentViewer.getZoomLevel()
 
         var textAnnot = new Annotations.FreeTextAnnotation()
         textAnnot.PageNumber = page_idx
@@ -214,28 +217,29 @@ const PrepareDocument = () => {
 
     const uploadForSigning = async () => {
         const referenceString = `docToSign/${user.uid}${Date.now()}.pdf`
-        const docRef = storage.ref(referenceString)
+        const docRef = ref(storage, referenceString)
         const {documentViewer, annotationManager} = instance.Core
         const doc = documentViewer.getDocument()
         const xfdfString = await annotationManager.exportAnnotations({widgets: true, fields: true})
         const data = await doc.getFileData({xfdfString})
         const arr = new Uint8Array(data)
         const blob = new Blob([arr], {type: 'application/pdf'})
-        docRef.put(blob).then(() => {
-            console.log('Upload the blob')
+        uploadBytes(docRef, blob).then((snapshot) => {
+            console.log('Uploaded a blob or file!', snapshot)
         })
 
         const emails = assignees?.map(assignee => assignee.email)
+        console.log(emails)
         await addDocumentToSign(user.uid, user.email, referenceString, emails)
         dispatch(resetSignee())
         navigate('/')
     }
 
     const drop = (e, instance) => {
-        const {docViewer} = instance;
-        const scrollElement = docViewer.getScrollViewElement();
-        const scrollLeft = scrollElement.scrollLeft;
-        const scrollTop = scrollElement.scrollTop;
+        const {documentViewer} = instance.Core
+        const scrollElement = documentViewer.getScrollViewElement();
+        const scrollLeft = scrollElement.scrollLeft || 0;
+        const scrollTop = scrollElement.scrollTop || 0;
         setDropPoint({x: e.pageX + scrollLeft, y: e.pageY + scrollTop})
         e.preventDefault();
         return false;
@@ -302,7 +306,7 @@ const PrepareDocument = () => {
                 </div>
             </div>
             <div className='prepare-viewer'>
-                <div className='webviewer' ref={viewer}></div>
+                <div className='webviewer' style={{height: '90vh'}} ref={viewer}></div>
             </div>
             <input type='file' ref={filePicker} style={{display: 'none'}} />
         </div>
