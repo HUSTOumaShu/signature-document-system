@@ -25,3 +25,7 @@
     justify-content: space-between;
     transition: 0.3s ease-in-out;
 }
+
+td {
+    align-content: center;
+}

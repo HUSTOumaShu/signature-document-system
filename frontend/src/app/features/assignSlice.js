@@ -16,10 +16,14 @@ export const assignSlice = createSlice({
                 email: action.payload.email,
             }]
         },
+        removeSignee: (state, action) => {
+            console.log('removeSignee', action.payload)
+            state.signees = state.signees.filter(signee => signee.key !== action.payload)
+        },
         resetSignee: (state, action) => {
             console.log('resetSignee')
             state.signees = []
         }
     }
 })
-export const { addSignee, resetSignee } = assignSlice.actions
+export const { addSignee, removeSignee, resetSignee } = assignSlice.actions

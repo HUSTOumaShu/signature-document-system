@@ -2,18 +2,19 @@ import { addDoc, collection, getDoc, getDocs, query, updateDoc, where } from "fi
 import { filestore } from "../firebase/firebase";
 import { mergeAnnotations } from "./documentStorage";
 
-export const addDocumentToSign = async (uid, email, reference, emails) => {
+export const addDocument = async (uid, email, title, message, reference, emails) => {
     if(!uid) return;
     const signed = false;
     const xfdf = [];
     const signedBy = [];
     const requestedTime = new Date()
     const signedTime = '';
-    console.log('addDocumentToSign', uid, email, reference, emails)
     try {
         const docRef = await addDoc(collection(filestore, 'documentsToSign'), {
             uid: uid,
             email: email,
+            title: title,
+            message: message,
             reference: reference,
             emails: emails,
             signed: signed,
@@ -29,11 +30,11 @@ export const addDocumentToSign = async (uid, email, reference, emails) => {
     }
 }
 
-export const updateDocumentToSign = async (docId, email, xfdfSign) => {
+export const updateDocument = async (docId, email, xfdfSign) => {
     const documentRef = collection(filestore, 'documentsToSign', docId);
     const docSnap = await getDoc(documentRef);
     if(docSnap.exists()) {
-        const {signedBy, emails, xfdf, docRef} = docSnap.data();
+        const {signedBy, emails, xfdf, reference} = docSnap.data();
         if(!signedBy.includes(email)) {
             const signedByArray = [...signedBy, email];
             const xfdfArary = [...xfdf, xfdfSign];
@@ -50,70 +51,53 @@ export const updateDocumentToSign = async (docId, email, xfdfSign) => {
                 signedTime: time
             });
 
-            mergeAnnotations(docRef, xfdf)
+            mergeAnnotations(reference, xfdf)
         }
     } else  {
         console.log('No such document');
     }
 }
 
-export const searchDocumentToSign = async (email) => {
+export const getInboxDocument = async (email) => {
     const documentRef = collection(filestore, 'documentsToSign');
-    const query = query(
-        documentRef, 
-        where('email', 'array-contains', email),
-        where('signed', '==', false)
+    const queryDoc = query(
+        documentRef,
+        where('emails', 'array-contains', email),
     );
 
-    const querySigned = query(
-        documentRef,
-        where('signedBy', 'array-contains', email),
-    )
+    const documents = [];
 
-    const docIds = []
-    const docIdSigned = []
-
-    await getDocs(querySigned).then((querySnapshot) => {
+    await getDocs(queryDoc).then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-            docIdSigned.push({docId: doc.id});
-        });
-    })
-    .catch((error) => {
-        console.log('Error getting documents: ', error);
-    });
-
-    await getDocs(query).then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const {docRef, emails, requestedTime} = doc.data();
-            docIds.push({docId: doc.id, docRef, emails, requestedTime});
+            const {email, reference, title, emails, requestedTime, signed, signedTime} = doc.data();
+            documents.push({docId: doc.id, email, title, reference, emails, requestedTime, signed, signedTime});
         });
     })
     .catch((error) => {
         console.log('Error getting documents: ', error);
     });
     
-    return docIds;
+    return documents;
 }
 
-export const searchDocumentsSigned = async (email) => {
+export const getSentDocument = async (email) => {
     const documentRef = collection(filestore, 'documentsToSign');
-    const docIds = []
-    const query = query(
+    const documents = []
+    const queryDoc = query(
         documentRef,
         where('email', '==', email),
-        where('signed', '==', true)
     );
 
-    await getDocs(query)
+    await getDocs(queryDoc)
     .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-            const {docRef, emails, signedTime} = doc.data();
-            docIds.push({docId: doc.id, docRef, emails, signedTime});
+            const {email, reference, title, emails, requestedTime, signed, signedTime} = doc.data();
+            documents.push({docId: doc.id, email, title, reference, emails, requestedTime, signed, signedTime});
         });
     })
     .catch((error) => {
         console.log('Error getting documents: ', error);
     });
 
-    return docIds;
+    return documents;
 }

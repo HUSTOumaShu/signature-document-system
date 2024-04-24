@@ -2,18 +2,23 @@ import React, { useState } from "react"
 import SideBar from "../../components/Sidebar"
 import './index.css'
 import { useDispatch, useSelector } from "react-redux";
-import { addSignee } from "../../app/features/assignSlice";
-import {Toast} from 'gestalt'
+import { addSignee, removeSignee } from "../../app/features/assignSlice";
+import { setHead } from "../../app/features/headDocSlice";
 import { useNavigate } from "react-router-dom";
+import { MdDeleteForever } from 'react-icons/md'
 
 const Assign = () => {
     const [email, setEmail] = useState('');
     const [displayName, setDisplayName] = useState('');
+    const [title, setTitle] = useState('');
+    const [message, setMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const assignees = useSelector(state => state.data.assign.signees)
+    const head = useSelector(state => state.data.head)
+    console.log(head)
 
     const addRepicent = (name, email) => {
         const key = `${new Date().getTime()}${email}`
@@ -25,8 +30,15 @@ const Assign = () => {
         }
     }
 
+    const removeRecipent = (key) => {
+        console.log('remove recipent', key)
+        dispatch(removeSignee(key))
+    }
+
     const prepare = () => {
         if(assignees.length > 0) {
+            dispatch(setHead({title, message}))
+            console.log('prepare', head)
             navigate('/prepare')
         }
         else {
@@ -41,20 +53,10 @@ const Assign = () => {
         <div className="assign-page">
             <SideBar />
             <div className="assign-content">
-                <div className="assign-add-document">
-                    <h1>Add Document</h1>
-                    <div style={{borderBottom: 'solid 1px #000'}}>
-                        <input class="form-control form-control-lg" id="formFileLg" type="file" />
-                    </div>
-                </div>
+                <h1>Create Document</h1>
+                
                 <div className="assign-add-recipent">
-                    <h1>Add Recipent</h1>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
-                        <label class="form-check-label" for="flexCheckDefault">
-                            I am the only signer
-                        </label>
-                    </div>
+                    <h2>Add Recipent</h2>
 
                     <div class="input-group mb-3">
                         <input 
@@ -93,6 +95,9 @@ const Assign = () => {
                             <tr key={user.key}>
                                 <td>{user.name}</td>
                                 <td>{user.email}</td>
+                                <td><button className='btn btn-outline-danger' onClick={() => {
+                                    removeRecipent(user.key)
+                                }}><MdDeleteForever /></button></td>
                             </tr>
                         ))}
                     </tbody>
@@ -102,11 +107,24 @@ const Assign = () => {
                     <h1>Add Message</h1>
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="basic-addon1">Title</span>
-                        <input type="text" class="form-control" placeholder="Enter the title of document" aria-label="title" aria-describedby="basic-addon1" />
+                        <input 
+                            type="text"
+                            class="form-control" 
+                            placeholder="Enter the title of document" 
+                            aria-label="title" 
+                            aria-describedby="basic-addon1"
+                            id="title"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)} />
                     </div>
                     <div class="input-group">
                         <span class="input-group-text">Email message</span>
-                        <textarea class="form-control" aria-label="message"></textarea>
+                        <textarea 
+                            class="form-control" 
+                            aria-label="message"
+                            id="message"
+                            value={message}
+                            onChange={e => setMessage(e.target.value)}></textarea>
                     </div>
                 </div>
                 <div className="button-group">
@@ -114,21 +132,6 @@ const Assign = () => {
                     <button type="button" class="btn btn-warning">Save to Draft</button>
                     <button type="button" class="btn btn-success" onClick={prepare}>Next</button>
                 </div>
-
-            <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-                    <img src="..." class="rounded me-2" alt="..." />
-                    <strong class="me-auto">Alert</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                        Please add at least one recipent
-                    </div>
-                </div>
-            </div>
-
-            <Toast show={showToast} text="Please add at least one recipent" />
 
             </div>
         </div>

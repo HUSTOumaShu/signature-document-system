@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import WebViewer from '@pdftron/webviewer'
 import { storage } from '../../firebase/firebase'
-import { addDocumentToSign } from '../../app/document'
+import { addDocument } from '../../app/document'
 import {resetSignee} from '../../app/features/assignSlice'
 import { FaSignature } from 'react-icons/fa'
 import { BsCalendar2DateFill } from 'react-icons/bs'
@@ -26,8 +26,11 @@ const PrepareDocument = () => {
     const [assignee, setAssignee] = useState(initialAssignee)
 
     const user = useSelector(state => state.data.user.user)
+    const {title, message} = useSelector(state => state.data.head)
     const viewer = useRef(null)
     const filePicker = useRef(null)
+
+    console.log(title, message)
 
     useEffect(() => {
         WebViewer(
@@ -230,7 +233,7 @@ const PrepareDocument = () => {
 
         const emails = assignees?.map(assignee => assignee.email)
         console.log(emails)
-        await addDocumentToSign(user.uid, user.email, referenceString, emails)
+        await addDocument(user.uid, user.email, title, message, referenceString, emails)
         dispatch(resetSignee())
         navigate('/')
     }

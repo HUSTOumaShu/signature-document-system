@@ -31,8 +31,6 @@ function App() {
         })
     }, [])
 
-    console.log(user, isLoading)
-
     return (
         <div className='app'>
             {isLoading ? (

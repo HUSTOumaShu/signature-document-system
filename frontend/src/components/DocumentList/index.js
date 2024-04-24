@@ -9,6 +9,7 @@ const DocumentList = ({docType, documents}) => {
             <div className='list--header'>
                 <h2>{docType}</h2>
                 <select>
+                    <option value='completed'>All</option>
                     <option value='completed'>Completed</option>
                     <option value='processing'>Processing</option>
                 </select>
@@ -28,15 +29,17 @@ const DocumentList = ({docType, documents}) => {
                         {documents?.map((document, index) => (
                             <tr key={index+1}>
                                 <td>{index + 1}</td>
-                                <td>
+                                <td style={{fontSize: '14px'}}>
                                     <strong>{document.title}</strong> <br />
-                                    From: {document.from} <br />
-                                    To: {document.to}
+                                    From: {document.email} <br />
+                                    To: {document.emails.map((email, index) => (
+                                        <span key={index}>{email}, </span>
+                                    ))} <br />
                                 </td>
-                                <td>{document.status}</td>
-                                <td>{document.lastChange}</td>
-                                <td style={{margin: '4px'}}>
-                                    {document.status === 'Processing' ? (
+                                <td>{(document.signed?`Complete` : `Processing`)}</td>
+                                <td>{document.requestedTime.toDate().toUTCString()}</td>
+                                <td>
+                                    {!document.signed ? (
                                         <a href='#' className='btn btn-outline-success' title='Sign Now'>
                                             <FaSignature />
                                         </a>
