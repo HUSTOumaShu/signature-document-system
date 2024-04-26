@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import SideBar from "../../components/Sidebar"
 import './index.css'
 import { useDispatch, useSelector } from "react-redux";
-import { addSignee, removeSignee } from "../../app/features/assignSlice";
+import { addSignee, removeSignee, resetSignee } from "../../app/features/assignSlice";
 import { setHead } from "../../app/features/headDocSlice";
 import { useNavigate } from "react-router-dom";
 import { MdDeleteForever } from 'react-icons/md'
@@ -47,6 +47,11 @@ const Assign = () => {
                 setShowToast(false)
             }, 1000)
         }
+    }
+
+    const discard = () => {
+        dispatch(resetSignee())
+        navigate('/')
     }
 
     return (
@@ -128,7 +133,7 @@ const Assign = () => {
                     </div>
                 </div>
                 <div className="button-group">
-                    <button type="button" class="btn btn-danger">Discard</button>
+                    <button type="button" class="btn btn-danger" onClick={discard}>Discard</button>
                     <button type="button" class="btn btn-warning">Save to Draft</button>
                     <button type="button" class="btn btn-success" onClick={prepare}>Next</button>
                 </div>

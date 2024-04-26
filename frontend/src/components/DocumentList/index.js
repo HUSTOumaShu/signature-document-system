@@ -2,8 +2,30 @@ import { FaSignature } from 'react-icons/fa'
 import { HiInformationCircle } from 'react-icons/hi'
 import { AiFillDelete, AiOutlineCloudDownload } from 'react-icons/ai'
 import './index.css'
+import { useDispatch, useSelector } from 'react-redux'
+import { setDocToSign, setDocToView } from '../../app/features/docSlice'
+import { useNavigate } from 'react-router-dom'
+import { getDownloadURL, ref } from 'firebase/storage'
+import { storage } from '../../firebase/firebase'
 
 const DocumentList = ({docType, documents}) => {
+    const docToSign = useSelector(state => state.data.doc.docToSign)
+    const docToView = useSelector(state => state.data.doc.docToView)
+
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+    const downloadDoc = async (reference, filename) => {
+        const URL = (await getDownloadURL(ref(storage, reference)))
+        console.log(URL)
+        var a = document.createElement('a')
+        a.href = URL
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+    }
+
     return (
         <div className='document--list'>
             <div className='list--header'>
@@ -40,20 +62,35 @@ const DocumentList = ({docType, documents}) => {
                                 <td>{document.requestedTime.toDate().toUTCString()}</td>
                                 <td>
                                     {!document.signed ? (
-                                        <a href='#' className='btn btn-outline-success' title='Sign Now'>
+                                        <button className='btn btn-outline-success' title='Sign Now'
+                                            onClick={() => {
+                                                const {emails, title, reference} = document
+                                                dispatch(setDocToSign({emails, title, reference}))
+                                                console.log(docToSign, docToView)
+                                                navigate('/sign')
+                                            }}>
                                             <FaSignature />
-                                        </a>
+                                        </button>
                                     ) : (
-                                        <a href='#' className='btn btn-outline-success' title='Detail'>
+                                        <button className='btn btn-outline-success' title='Detail'
+                                            onClick={() => {
+                                                const {emails, title, reference} = document
+                                                dispatch(setDocToView({emails, title, reference}))
+                                                console.log(docToSign, docToView)
+                                                navigate('/viewDocument')
+                                            }}>
                                             <HiInformationCircle />
-                                        </a>
+                                        </button>
                                     )}
                                     <a href='#' className='btn btn-outline-danger' title='Delete'>
                                         <AiFillDelete />
                                     </a>
-                                    <a href='#' className='btn btn-outline-warning' title='Download'>
+                                    <button className='btn btn-outline-warning' title='Download' onClick={() => {
+                                        console.log('Download', document.reference)
+                                        downloadDoc(document.reference, document.title)
+                                    }}>
                                         <AiOutlineCloudDownload />
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         ))}    

@@ -11,6 +11,7 @@ const SentPage = () => {
 
     const user = useSelector(state => state.data.user.user)
     const [documents, setDocuments] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
     const [show, setShow] = useState(true)
 
     useEffect(() => {
@@ -18,6 +19,7 @@ const SentPage = () => {
             const sentDocs = await getSentDocument(user.email)
             setDocuments(sentDocs)
             setShow(false)
+            setIsLoading(false)
         }
         setTimeout(getDocs, 1000)
     }, [user.email])
@@ -29,7 +31,13 @@ const SentPage = () => {
             <SideBar />
             <div className="document-content">
                 <Header title="Document" />
-                <DocumentList docType="Sent" documents={documents} />
+                {isLoading ? (
+                    <div className="loader-container">
+                        <div className="loader"></div>
+                    </div>
+                ) : (
+                    <DocumentList docType="Sent" documents={documents} />
+                )}
             </div>
         </div>
     )

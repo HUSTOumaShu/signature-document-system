@@ -10,7 +10,6 @@ const Profile = () => {
     const dispatch = useDispatch();
     const user = useSelector(state => state.data.user.user);
     const navigate = useNavigate();
-    console.log(user)
 
     const handleLogout = () => {
         dispatch(loginUser())

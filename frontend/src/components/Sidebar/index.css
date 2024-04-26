@@ -51,3 +51,28 @@
     background-color: #27374d;
     color: #dde6ed;
 }
+
+.menu--list .active-item {
+    background-color: #27374d;
+    color: #dde6ed;
+}
+
+.accordion-body {
+    background: #dde6ed;
+    
+}
+
+.accordion-header {
+    background-color: #dde6ed;
+}
+
+.accordion-button {
+    background: transparent
+}
+.accordion-button:focus {
+    box-shadow: none;
+}
+.accordion-button:not(.collapsed) {
+    background: transparent;
+    color: #27374d;
+}
