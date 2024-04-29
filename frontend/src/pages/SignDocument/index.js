@@ -9,11 +9,24 @@ import { storage } from '../../firebase/firebase'
 const SignDocument = () => {
     const [instance, setInstance] = useState(null)
     const [annotationManager, setAnnotationManager] = useState(null)
-    const [annotationPosition, setAnnotationPosition] = useState(0)
+
+    const [password, setPassword] = useState('')
+    const [docInfo, setDocInfo] = useState({
+        location: '',
+        reason: '',
+        contact: ''
+    })
+    const handleChange = (e) => {
+        setDocInfo((prev) => ({
+            ...prev,
+            [e.target.id]: e.target.value
+        }))
+    }
 
     const user = useSelector(state => state.data.user.user)
     const docToSign = useSelector(state => state.data.doc.docToSign)
     
+    const pfxFile = useRef(null)
     const viewer = useRef(null)
 
     useEffect(() => {
@@ -79,8 +92,27 @@ const SignDocument = () => {
     }, [docToSign, user])
 
     const signDocument = async () => {
-        const annotations = await annotationManager.getAnnotationsList()
+        const { PDFNet, documentViewer, Annotations} = instance.Core
+        const doc = await documentViewer.getDocument().getPDFDoc()
+
+        const field = await doc.getField('c@gmail.com_SIGNATURE_17139425266481')
+        const signatureField = await PDFNet.DigitalSignatureField.createFromField(field)
         
+        const url = URL.createObjectURL(pfxFile.current.files[0])
+        console.log(url, password)
+        await signatureField.signOnNextSaveFromURL(url, password)
+        console.log('Sign success!')
+
+        const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+        const blob = new Blob([docBuf], {type: 'application/pdf'})
+        console.log(blob)
+        
+        console.log(docBuf)
+
+        await signatureField.setLocation(docInfo.location)
+        await signatureField.setReason(docInfo.reason)
+        await signatureField.setContactInfo(docInfo.contact)
+
         const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
         console.log(xfdf)
     }
@@ -102,58 +134,64 @@ const SignDocument = () => {
                             <div class="accordion-body">
                                 <div class="mb-3">
                                     <label for="location" class="form-label">Location</label>
-                                    <input type="text" class="form-control" id="location" placeholder="Ex: Hanoi, Vietnam" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="reason" class="form-label">Reason</label>
-                                        <input type="text" class="form-control" id="reason" placeholder="Ex: Sign for testing" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="contact" class="form-label">Contact Information</label>
-                                        <input type="text" class="form-control" id="contact" placeholder="Ex: example@gmail.com" />
-                                    </div>
+                                    <input type="text" class="form-control" id="location" placeholder="Ex: Hanoi, Vietnam"
+                                        value={docInfo.location}
+                                        onChange={handleChange} />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <input type="text" class="form-control" id="reason" placeholder="Ex: Sign for testing"
+                                        value={docInfo.reason}
+                                        onChange={handleChange} />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contact" class="form-label">Contact Information</label>
+                                    <input type="text" class="form-control" id="contact" placeholder="Ex: example@gmail.com"
+                                        value={docInfo.contact}
+                                        onChange={handleChange} />
                                 </div>
                             </div>
                         </div>
-                    </div>                    
-                </div>
-
-                <div className='sign-actions'>
-                    <div>Apply Fields</div>
-                    <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                    >Sign Now &nbsp; <FaFileSignature  /></button>
-                </div>
-            </div>
-            <div className='sign-viewer'>
-                <div className='webviewer' ref={viewer} style={{height: '96vh'}}></div>
+                    </div>
+                </div>                    
             </div>
 
-            {/* Modal */}
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Information Signature</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div className='sign-actions'>
+                <div>Apply Fields</div>
+                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                >Sign Now &nbsp; <FaFileSignature  /></button>
+            </div>
+        </div>
+        <div className='sign-viewer'>
+            <div className='webviewer' ref={viewer} style={{height: '96vh'}}></div>
+        </div>
+
+        {/* Modal */}
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Information Signature</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="formFileSm" class="form-label">Add Digital ID file</label>
+                        <input class="form-control form-control-sm" id="formFileSm" type="file" accept='.pfx' ref={pfxFile} />
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="formFileSm" class="form-label">Add Digital ID file</label>
-                            <input class="form-control form-control-sm" id="formFileSm" type="file" accept='.pfx' />
-                        </div>
-                        <div class="mb-3">
-                            <label for="inputPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="inputPassword" />
-                        </div>
+                    <div class="mb-3">
+                        <label for="inputPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="inputPassword" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onClick={signDocument}>Sign Now!</button>
-                    </div>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onClick={signDocument}>Sign Now!</button>
+                </div>
                 </div>
             </div>
         </div>
+    </div>
     )
 }
 
