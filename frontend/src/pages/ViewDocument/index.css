@@ -1,0 +1,14 @@
+.view-page {
+    display: flex;
+    gap: 20px;
+}
+.view-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2.3rem;
+    height: 94vh;
+}
+.view-content {
+    width: 100%;
+    height: 100%;
+}

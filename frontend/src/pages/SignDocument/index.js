@@ -3,13 +3,18 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { FaFileSignature } from 'react-icons/fa'
 import WebViewer from '@pdftron/webviewer'
-import { getDownloadURL, ref } from 'firebase/storage'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { storage } from '../../firebase/firebase'
+import { updateDocument } from '../../app/document'
+import { useNavigate } from 'react-router-dom'
 
 const SignDocument = () => {
+    const navigate = useNavigate()
+
     const [instance, setInstance] = useState(null)
     const [annotationManager, setAnnotationManager] = useState(null)
 
+    const [fieldName, setFieldName] = useState('')
     const [password, setPassword] = useState('')
     const [docInfo, setDocInfo] = useState({
         location: '',
@@ -25,6 +30,7 @@ const SignDocument = () => {
 
     const user = useSelector(state => state.data.user.user)
     const docToSign = useSelector(state => state.data.doc.docToSign)
+    console.log(docToSign)
     
     const pfxFile = useRef(null)
     const viewer = useRef(null)
@@ -80,7 +86,13 @@ const SignDocument = () => {
                         annotations.forEach(annotation => {
                             if(annotation instanceof Annotations.WidgetAnnotation) {
                                 Annotations.WidgetAnnotation.getCustomStyles = normalStyles
-                                if(!annotation.fieldName.startsWith(user.email)) {
+                                if(annotation.fieldName.startsWith(user.email)) {
+                                    if(annotation instanceof Annotations.SignatureWidgetAnnotation) {
+                                        console.log(annotation.fieldName)
+                                        setFieldName(annotation.fieldName)
+                                    }
+                                }
+                                else {
                                     annotation.Hidden = true
                                     annotation.Listable = false
                                 }
@@ -92,29 +104,33 @@ const SignDocument = () => {
     }, [docToSign, user])
 
     const signDocument = async () => {
-        const { PDFNet, documentViewer, Annotations} = instance.Core
+        const { PDFNet, documentViewer } = instance.Core
         const doc = await documentViewer.getDocument().getPDFDoc()
-
-        const field = await doc.getField('c@gmail.com_SIGNATURE_17139425266481')
+        
+        // Get signature field for signing
+        const field = await doc.getField(fieldName)
         const signatureField = await PDFNet.DigitalSignatureField.createFromField(field)
         
+        // Sign the document
         const url = URL.createObjectURL(pfxFile.current.files[0])
-        console.log(url, password)
         await signatureField.signOnNextSaveFromURL(url, password)
-        console.log('Sign success!')
-
         const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
         const blob = new Blob([docBuf], {type: 'application/pdf'})
-        console.log(blob)
         
-        console.log(docBuf)
-
         await signatureField.setLocation(docInfo.location)
         await signatureField.setReason(docInfo.reason)
         await signatureField.setContactInfo(docInfo.contact)
 
+        // Update the document
+        const docRef = ref(storage, docToSign.reference)
+        uploadBytes(docRef, blob).then((snapshot) => {
+            console.log('Document signed', snapshot)
+        })
+
+        // Update xfdf
         const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
-        console.log(xfdf)
+        await updateDocument(docToSign.docId, user.email, xfdf)
+        navigate('/')
     }
 
     return (

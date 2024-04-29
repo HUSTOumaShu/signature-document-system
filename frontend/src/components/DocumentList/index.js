@@ -58,15 +58,15 @@ const DocumentList = ({docType, documents}) => {
                                         <span key={index}>{email}, </span>
                                     ))} <br />
                                 </td>
-                                <td>{(document.signed?`Complete` : `Processing`)}</td>
+                                <td>{(document.signed?`Completed` : `Processing`)}</td>
                                 <td>{document.requestedTime.toDate().toUTCString()}</td>
                                 <td>
                                     {!document.signed ? (
                                         <button className='btn btn-outline-success' title='Sign Now'
                                             onClick={() => {
-                                                const {emails, title, reference} = document
-                                                dispatch(setDocToSign({emails, title, reference}))
-                                                console.log(docToSign, docToView)
+                                                const {docId, emails, title, reference} = document
+                                                dispatch(setDocToSign({docId, emails, title, reference}))
+                                                console.log('Sign', docToSign)
                                                 navigate('/sign')
                                             }}>
                                             <FaSignature />
@@ -74,9 +74,9 @@ const DocumentList = ({docType, documents}) => {
                                     ) : (
                                         <button className='btn btn-outline-success' title='Detail'
                                             onClick={() => {
-                                                const {emails, title, reference} = document
-                                                dispatch(setDocToView({emails, title, reference}))
-                                                console.log(docToSign, docToView)
+                                                const {docId, emails, title, reference} = document
+                                                dispatch(setDocToView({docId, emails, title, reference}))
+                                                console.log('View', docToView)
                                                 navigate('/viewDocument')
                                             }}>
                                             <HiInformationCircle />
