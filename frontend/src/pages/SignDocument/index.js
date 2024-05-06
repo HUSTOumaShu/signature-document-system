@@ -106,30 +106,35 @@ const SignDocument = () => {
     const signDocument = async () => {
         const { PDFNet, documentViewer } = instance.Core
         const doc = await documentViewer.getDocument().getPDFDoc()
-        
+
         // Get signature field for signing
         const field = await doc.getField(fieldName)
         const signatureField = await PDFNet.DigitalSignatureField.createFromField(field)
-        
+
+        // Update xfdf
+        const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
+        await updateDocument(docToSign.docId, user.email, xfdf)
+        const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
+
         // Sign the document
         const url = URL.createObjectURL(pfxFile.current.files[0])
         await signatureField.signOnNextSaveFromURL(url, password)
-        const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
-        const blob = new Blob([docBuf], {type: 'application/pdf'})
         
         await signatureField.setLocation(docInfo.location)
         await signatureField.setReason(docInfo.reason)
         await signatureField.setContactInfo(docInfo.contact)
 
+        await doc.fdfMerge(fdfDoc)
+
+        const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+        const blob = new Blob([docBuf], {type: 'application/pdf'})
+        
         // Update the document
         const docRef = ref(storage, docToSign.reference)
         uploadBytes(docRef, blob).then((snapshot) => {
             console.log('Document signed', snapshot)
         })
 
-        // Update xfdf
-        const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
-        await updateDocument(docToSign.docId, user.email, xfdf)
         navigate('/')
     }
 

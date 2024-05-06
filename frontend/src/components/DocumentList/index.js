@@ -74,8 +74,8 @@ const DocumentList = ({docType, documents}) => {
                                     ) : (
                                         <button className='btn btn-outline-success' title='Detail'
                                             onClick={() => {
-                                                const {docId, emails, title, reference} = document
-                                                dispatch(setDocToView({docId, emails, title, reference}))
+                                                const {docId, email, emails, title, message, reference, requestedTime, signedTime} = document
+                                                dispatch(setDocToView({docId, email, emails, title, message, reference, requestedTime, signedTime}))
                                                 console.log('View', docToView)
                                                 navigate('/viewDocument')
                                             }}>
@@ -93,7 +93,7 @@ const DocumentList = ({docType, documents}) => {
                                     </button>
                                 </td>
                             </tr>
-                        ))}    
+                        ))}
                     </tbody>
                 </table>
             </div>

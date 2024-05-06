@@ -9,6 +9,7 @@ const ViewDocument = () => {
     const docToView = useSelector(state => state.data.doc.docToView)
     const viewer = useRef(null)
     const dispatch = useDispatch()
+    console.log(docToView)
 
     const [instance, setInstance] = useState(null)
 
@@ -25,19 +26,41 @@ const ViewDocument = () => {
             ]
         }, viewer.current)
         .then(async (instance) => {
-            const { documentViewer } = instance.Core
-            instance.UI.setToolbarGroup('toolbarGroup-View')
             setInstance(instance)
+            const { documentViewer, PDFNet, annotationManager } = instance.Core
+            instance.UI.setToolbarGroup('toolbarGroup-View')
+            
             const URL = (await getDownloadURL(ref(storage, docToView.reference))).toString()
-            console.log(URL)
             documentViewer.loadDocument(URL)
+
+            annotationManager.enableReadOnlyMode()
+            
+            // Verify Certificate
+            // const digitalSignatures = await doc.getDigitalSignatureFieldIteratorBegin()
+            // console.log(digitalSignatures)
+
+            // Add trusted certificate
+            // const opts = PDFNet.VerificationOptions.create(PDFNet.VerificationOptions.SecurityLevel.e_compatibility_and_archiving)
+            // (await opts).addTrustedCertificateFromURL(
+
+            // )
+
         })
-    })
+    }, [dispatch, docToView.reference])
+
+    const detail = async () => {
+        console.log(instance)
+        const { documentViewer } = instance.Core
+        const doc = documentViewer.getDocument()
+        // const signatures = await doc.getDigitalSignatureFieldIteratorBegin()
+        console.log(doc)
+    }
 
     return (
         <div className='view-page'>
             <div className='view-sidebar'>
                 <h1>View Document</h1>
+                <button onClick={detail}>Detail</button>
             </div>
             <div className='view-content'>
                 <div className='webviewer' ref={viewer} style={{height: '96vh'}}></div>

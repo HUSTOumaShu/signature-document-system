@@ -27,6 +27,7 @@ function App() {
                 dispatch(setLoading(false))
             } else {
                 console.log('User is logged out')
+                dispatch(setLoading(false))
             }
         })
     }, [])

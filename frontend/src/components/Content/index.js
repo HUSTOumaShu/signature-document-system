@@ -26,7 +26,12 @@ const Content = () => {
 
     const requiredDoc = inboxDoc.filter(doc => !doc.signed)
     const waitingDoc = sentDoc.filter(doc => !doc.signed)
-    const completedDoc = sentDoc.filter(doc => doc.signed).concat(inboxDoc.filter(doc => doc.signed))
+    const completedDoc = sentDoc.filter(doc => doc.signed)
+    inboxDoc.filter(doc => doc.signed).forEach(doc => {
+        if(!completedDoc.includes(doc)) {
+            completedDoc.push(doc)
+        }
+    })
     return (
         <div className="content">
             <Header title="Dashboard" />

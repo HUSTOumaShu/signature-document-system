@@ -1,6 +1,5 @@
 import { addDoc, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { filestore } from "../firebase/firebase";
-import { mergeAnnotations } from "./documentStorage";
 
 export const addDocument = async (uid, email, title, message, reference, emails) => {
     if(!uid) return;
@@ -32,7 +31,6 @@ export const addDocument = async (uid, email, title, message, reference, emails)
 
 export const updateDocument = async (docId, email, xfdfSign) => {
     const documentRef = doc(filestore, 'documentsToSign', docId);
-    console.log('documentRef: ', documentRef)
     const docSnap = await getDoc(documentRef);
     if(docSnap.exists()) {
         const {signedBy, emails, xfdf, reference} = docSnap.data();
@@ -43,14 +41,13 @@ export const updateDocument = async (docId, email, xfdfSign) => {
                 signedBy: signedByArray,
                 xfdf: xfdfArary
             });
-            if(signedBy.length === emails.length) {
-                const time = new Date()
-                await updateDoc(documentRef, {
-                    signed: true,
-                    signedTime: time
-                });
-                mergeAnnotations(reference, xfdf)
-            }
+        }
+        if(signedBy.length + 1 === emails.length) {
+            const time = new Date()
+            await updateDoc(documentRef, {
+                signed: true,
+                signedTime: time
+            });
         }
         
     } else  {
