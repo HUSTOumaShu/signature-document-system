@@ -126,6 +126,7 @@ const SignDocument = () => {
 
         await doc.fdfMerge(fdfDoc)
 
+        // Convert the document to blob
         const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
         const blob = new Blob([docBuf], {type: 'application/pdf'})
         
@@ -207,7 +208,7 @@ const SignDocument = () => {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onClick={signDocument}>Sign Now!</button>
+                    <button type="button" class="btn btn-primary" onClick={signDocument} data-bs-dismiss='modal'>Sign Now!</button>
                 </div>
                 </div>
             </div>
