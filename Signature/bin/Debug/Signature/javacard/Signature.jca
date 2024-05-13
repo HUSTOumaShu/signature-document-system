@@ -1,0 +1,467 @@
+// converted by version 1.3
+// on Mon Nov 13 09:56:37 ICT 2023
+
+.package Signature {
+	.aid 0x20:0x20:0x47:0x57:0x1;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.5;		//javacard/framework
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x2 1.5;		//javacard/security
+		0xA0:0x0:0x0:0x0:0x62:0x2:0x1 1.5;		//javacardx/crypto
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+	}
+
+	.applet {
+		0x20:0x20:0x47:0x57:0x1:0x1 Signature_CSR;
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef short Signature_CSR/sigLen;
+		// 1
+		instanceFieldRef byte[] Signature_CSR/sig_buffer;
+		// 2
+		instanceFieldRef 1.15 Signature_CSR/rsaSig;
+		// 3
+		instanceFieldRef 1.8 Signature_CSR/rsaPrivate;
+		// 4
+		instanceFieldRef 1.9 Signature_CSR/rsaPublic;
+		// 5
+		instanceFieldRef 1.16 Signature_CSR/keyPair;
+		// 6
+		instanceFieldRef byte[] Signature_CSR/buf_temp;
+		// 7
+		instanceFieldRef byte[] Signature_CSR/exp;
+		// 8
+		instanceFieldRef short Signature_CSR/exp_len;
+		// 9
+		instanceFieldRef byte[] Signature_CSR/mod;
+		// 10
+		instanceFieldRef short Signature_CSR/mod_len;
+		// 11
+		staticMethodRef 1.16.0(BS)V;		// javacard/security/KeyPair.<init>(BS)V
+		// 12
+		staticMethodRef 1.13.0(BSZ)Ljavacard/security/Key;;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 13
+		classRef Signature_CSR;
+		// 14
+		staticMethodRef Signature_CSR/<init>()V;
+		// 15
+		virtualMethodRef 0.3.2([BSB)V;		// register([BSB)V
+		// 16
+		virtualMethodRef 0.3.3()Z;		// selectingApplet()Z
+		// 17
+		virtualMethodRef 0.10.1()[B;		// getBuffer()[B
+		// 18
+		virtualMethodRef 0.10.6()S;		// setIncomingAndReceive()S
+		// 19
+		staticMethodRef 0.8.13(SB)[B;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+		// 20
+		classRef 1.8;		// javacard/security/RSAPrivateKey
+		// 21
+		virtualMethodRef 1.16.1()V;		// genKeyPair()V
+		// 22
+		virtualMethodRef 1.16.2()Ljavacard/security/PrivateKey;;		// getPrivate()Ljavacard/security/PrivateKey;
+			.descriptor	Ljavacard/security/PrivateKey;	1.2;
+
+		// 23
+		virtualMethodRef 1.16.3()Ljavacard/security/PublicKey;;		// getPublic()Ljavacard/security/PublicKey;
+			.descriptor	Ljavacard/security/PublicKey;	1.3;
+
+		// 24
+		staticMethodRef 1.15.0(BZ)Ljavacard/security/Signature;;		// javacard/security/Signature.getInstance(BZ)Ljavacard/security/Signature;
+			.descriptor	Ljavacard/security/Signature;	1.15;
+
+		// 25
+		classRef 1.9;		// javacard/security/RSAPublicKey
+		// 26
+		staticMethodRef 0.16.6([BSS)S;		// javacard/framework/Util.setShort([BSS)S
+		// 27
+		staticMethodRef 0.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 28
+		classRef 1.16;		// javacard/security/KeyPair
+		// 29
+		virtualMethodRef 1.15.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 30
+		virtualMethodRef 1.15.5([BSS[BS)S;		// sign([BSS[BS)S
+		// 31
+		virtualMethodRef 0.10.7()S;		// setOutgoing()S
+		// 32
+		virtualMethodRef 0.10.9(S)V;		// setOutgoingLength(S)V
+		// 33
+		virtualMethodRef 0.10.5([BSS)V;		// sendBytesLong([BSS)V
+		// 34
+		virtualMethodRef 1.15.7([BSS[BSS)Z;		// verify([BSS[BSS)Z
+		// 35
+		virtualMethodRef 0.10.8(SS)V;		// setOutgoingAndSend(SS)V
+		// 36
+		staticMethodRef 2.1.0(BZ)Ljavacardx/crypto/Cipher;;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+			.descriptor	Ljavacardx/crypto/Cipher;	2.1;
+
+		// 37
+		virtualMethodRef 2.1.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 38
+		virtualMethodRef 2.1.1([BSS[BS)S;		// doFinal([BSS[BS)S
+		// 39
+		staticMethodRef 0.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 40
+		virtualMethodRef 0.10.3(S)S;		// receiveBytes(S)S
+	}
+
+	.class public Signature_CSR 0 extends 0.3 {		// extends javacard/framework/Applet
+
+		.fields {
+			private final 1.16 keyPair 0;		// Ljavacard/security/KeyPair;
+			private 1.8 rsaPrivate 1;		// Ljavacard/security/RSAPrivateKey;
+			private 1.9 rsaPublic 2;		// Ljavacard/security/RSAPublicKey;
+			private final 1.15 rsaSig 3;		// Ljavacard/security/Signature;
+			private byte[] buf_temp 4;		// [B
+			private final byte[] sig_buffer 5;		// [B
+			private byte[] mod 6;		// [B
+			private byte[] exp 7;		// [B
+			private final short sigLen 8;		// S
+			private short mod_len 9;		// S
+			private short exp_len 10;		// S
+			private static final byte INS_GENKEY = 0;		// B
+			private static final byte INS_SIGN = 1;		// B
+			private static final byte INS_VERIFY = 2;		// B
+			private static final byte INS_SIGN_NO_HASH = 3;		// B
+			private static final byte INS_GET_EXP = 4;		// B
+			private static final byte INS_GET_MOD_START = 5;		// B
+			private static final byte INS_GET_MOD_END = 6;		// B
+			private static final byte INS_GET_MORE_DATA = 16;		// B
+		}
+
+		.publicMethodTable 7 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method private <init>()V {
+			.stack 6;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 27;		// javacard/framework/Applet.<init>()V
+					aload_0;
+					sspush 256;
+					putfield_s 0;		// short Signature/Signature_CSR.sigLen
+					aload_0;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					newarray 11;
+					putfield_a 1;		// reference Signature/Signature_CSR.sig_buffer
+					aload_0;
+					bspush 40;
+					sconst_0;
+					invokestatic 24;		// javacard/security/Signature.getInstance(BZ)Ljavacard/security/Signature;
+					putfield_a 2;		// reference Signature/Signature_CSR.rsaSig
+					aload_0;
+					sconst_5;
+					bspush 8;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					smul;
+					sconst_0;
+					invokestatic 12;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+					checkcast 0 20;		// T_CLASSORINTERFACE javacard/security/RSAPrivateKey
+					putfield_a 3;		// reference Signature/Signature_CSR.rsaPrivate
+					aload_0;
+					sconst_4;
+					bspush 8;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					smul;
+					sconst_0;
+					invokestatic 12;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+					checkcast 0 25;		// T_CLASSORINTERFACE javacard/security/RSAPublicKey
+					putfield_a 4;		// reference Signature/Signature_CSR.rsaPublic
+					aload_0;
+					new 28;		// javacard/security/KeyPair
+					dup;
+					sconst_1;
+					bspush 8;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					smul;
+					invokespecial 11;		// javacard/security/KeyPair.<init>(BS)V
+					putfield_a 5;		// reference Signature/Signature_CSR.keyPair
+					return;
+		}
+
+		.method public static install([BSB)V 0 {
+			.stack 5;
+			.locals 0;
+
+				L0:	new 13;		// Signature/Signature_CSR
+					dup;
+					invokespecial 14;		// Signature/Signature_CSR.<init>()V
+					aload_0;
+					sload_1;
+					sconst_1;
+					sadd;
+					aload_0;
+					sload_1;
+					baload;
+					invokevirtual 15;		// register([BSB)V
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 7;
+			.locals 6;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					invokevirtual 16;		// selectingApplet()Z
+					ifeq L2;
+				L1:	return;
+				L2:	aload_1;
+					invokevirtual 17;		// getBuffer()[B
+					astore_2;
+				L3:	aload_2;
+					sconst_4;
+					baload;
+					sspush 255;
+					sand;
+					sstore_3;
+				L4:	aload_1;
+					invokevirtual 18;		// setIncomingAndReceive()S
+					sstore 4;
+				L5:	aload_0;
+					sload_3;
+					sconst_1;
+					invokestatic 19;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putfield_a 6;		// reference Signature/Signature_CSR.buf_temp
+					goto L7;
+				L6:	sload_3;
+					sload 4;
+					ssub;
+					sstore_3;
+					aload_1;
+					sconst_5;
+					invokevirtual 40;		// receiveBytes(S)S
+					sstore 4;
+				L7:	sload_3;
+					ifgt L6;
+				L8:	sconst_0;
+					sstore 5;
+				L9:	goto L13;
+				L10:	sload 5;
+					sconst_5;
+					sadd;
+					sstore 6;
+				L11:	getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					sload 5;
+					aload_2;
+					sload 6;
+					baload;
+					bastore;
+				L12:	sinc 5 1;
+				L13:	sload 5;
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					arraylength;
+					if_scmplt L10;
+				L14:	aload_2;
+					sconst_1;
+					baload;
+					stableswitch L28 0 6 L15 L16 L18 L23 L25 L26 L27;
+				L15:	getfield_a_this 5;		// reference Signature/Signature_CSR.keyPair
+					invokevirtual 21;		// genKeyPair()V
+					aload_0;
+					getfield_a_this 5;		// reference Signature/Signature_CSR.keyPair
+					invokevirtual 22;		// getPrivate()Ljavacard/security/PrivateKey;
+					checkcast 0 20;		// T_CLASSORINTERFACE javacard/security/RSAPrivateKey
+					putfield_a 3;		// reference Signature/Signature_CSR.rsaPrivate
+					aload_0;
+					getfield_a_this 5;		// reference Signature/Signature_CSR.keyPair
+					invokevirtual 23;		// getPublic()Ljavacard/security/PublicKey;
+					checkcast 0 25;		// T_CLASSORINTERFACE javacard/security/RSAPublicKey
+					putfield_a 4;		// reference Signature/Signature_CSR.rsaPublic
+					aload_0;
+					bspush 8;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					smul;
+					newarray 11;
+					putfield_a 7;		// reference Signature/Signature_CSR.exp
+					aload_0;
+					getfield_a_this 4;		// reference Signature/Signature_CSR.rsaPublic
+					getfield_a_this 7;		// reference Signature/Signature_CSR.exp
+					sconst_2;
+					invokeinterface 3 25 4;		// javacard/security/RSAPublicKey
+					putfield_s 8;		// short Signature/Signature_CSR.exp_len
+					getfield_a_this 7;		// reference Signature/Signature_CSR.exp
+					sconst_0;
+					getfield_s_this 8;		// short Signature/Signature_CSR.exp_len
+					invokestatic 26;		// javacard/framework/Util.setShort([BSS)S
+					pop;
+					aload_0;
+					bspush 8;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					smul;
+					newarray 11;
+					putfield_a 9;		// reference Signature/Signature_CSR.mod
+					aload_0;
+					getfield_a_this 4;		// reference Signature/Signature_CSR.rsaPublic
+					getfield_a_this 9;		// reference Signature/Signature_CSR.mod
+					sconst_2;
+					invokeinterface 3 25 5;		// javacard/security/RSAPublicKey
+					putfield_s 10;		// short Signature/Signature_CSR.mod_len
+					getfield_a_this 9;		// reference Signature/Signature_CSR.mod
+					sconst_0;
+					getfield_s_this 10;		// short Signature/Signature_CSR.mod_len
+					invokestatic 26;		// javacard/framework/Util.setShort([BSS)S
+					pop;
+					goto_w L29;
+				L16:	getfield_a_this 2;		// reference Signature/Signature_CSR.rsaSig
+					getfield_a_this 3;		// reference Signature/Signature_CSR.rsaPrivate
+					sconst_1;
+					invokevirtual 29;		// init(Ljavacard/security/Key;B)V
+					getfield_a_this 2;		// reference Signature/Signature_CSR.rsaSig
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					sconst_0;
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					arraylength;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					sconst_0;
+					invokevirtual 30;		// sign([BSS[BS)S
+					sstore 5;
+				L17:	aload_1;
+					invokevirtual 31;		// setOutgoing()S
+					pop;
+					aload_1;
+					sload 5;
+					invokevirtual 32;		// setOutgoingLength(S)V
+					aload_1;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					sconst_0;
+					sload 5;
+					invokevirtual 33;		// sendBytesLong([BSS)V
+					goto_w L29;
+				L18:	getfield_a_this 2;		// reference Signature/Signature_CSR.rsaSig
+					getfield_a_this 4;		// reference Signature/Signature_CSR.rsaPublic
+					sconst_2;
+					invokevirtual 29;		// init(Ljavacard/security/Key;B)V
+					getfield_a_this 2;		// reference Signature/Signature_CSR.rsaSig
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					sconst_0;
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					arraylength;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					sconst_0;
+					getfield_s_this 0;		// short Signature/Signature_CSR.sigLen
+					invokevirtual 34;		// verify([BSS[BSS)Z
+					sstore 6;
+				L19:	aload_2;
+					sconst_0;
+					sload 6;
+					ifeq L21;
+				L20:	sconst_1;
+					goto L22;
+				L21:	sconst_0;
+				L22:	bastore;
+					aload_1;
+					sconst_0;
+					sconst_1;
+					invokevirtual 35;		// setOutgoingAndSend(SS)V
+					goto_w L29;
+				L23:	bspush 10;
+					sconst_0;
+					invokestatic 36;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+					astore 7;
+				L24:	aload 7;
+					getfield_a_this 3;		// reference Signature/Signature_CSR.rsaPrivate
+					sconst_2;
+					invokevirtual 37;		// init(Ljavacard/security/Key;B)V
+					aload 7;
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					sconst_0;
+					getfield_a_this 6;		// reference Signature/Signature_CSR.buf_temp
+					arraylength;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					sconst_0;
+					invokevirtual 38;		// doFinal([BSS[BS)S
+					pop;
+					aload_1;
+					invokevirtual 31;		// setOutgoing()S
+					pop;
+					aload_1;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					arraylength;
+					invokevirtual 32;		// setOutgoingLength(S)V
+					aload_1;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					sconst_0;
+					getfield_a_this 1;		// reference Signature/Signature_CSR.sig_buffer
+					arraylength;
+					invokevirtual 33;		// sendBytesLong([BSS)V
+					goto L29;
+				L25:	aload_1;
+					invokevirtual 31;		// setOutgoing()S
+					pop;
+					aload_1;
+					getfield_s_this 8;		// short Signature/Signature_CSR.exp_len
+					invokevirtual 32;		// setOutgoingLength(S)V
+					aload_1;
+					getfield_a_this 7;		// reference Signature/Signature_CSR.exp
+					sconst_2;
+					getfield_s_this 8;		// short Signature/Signature_CSR.exp_len
+					invokevirtual 33;		// sendBytesLong([BSS)V
+					goto L29;
+				L26:	aload_1;
+					invokevirtual 31;		// setOutgoing()S
+					pop;
+					aload_1;
+					getfield_s_this 10;		// short Signature/Signature_CSR.mod_len
+					sconst_2;
+					sdiv;
+					invokevirtual 32;		// setOutgoingLength(S)V
+					aload_1;
+					getfield_a_this 9;		// reference Signature/Signature_CSR.mod
+					sconst_2;
+					getfield_s_this 10;		// short Signature/Signature_CSR.mod_len
+					sconst_2;
+					sdiv;
+					invokevirtual 33;		// sendBytesLong([BSS)V
+					goto L29;
+				L27:	aload_1;
+					invokevirtual 31;		// setOutgoing()S
+					pop;
+					aload_1;
+					getfield_s_this 10;		// short Signature/Signature_CSR.mod_len
+					sconst_2;
+					sdiv;
+					invokevirtual 32;		// setOutgoingLength(S)V
+					aload_1;
+					getfield_a_this 9;		// reference Signature/Signature_CSR.mod
+					sconst_2;
+					getfield_s_this 10;		// short Signature/Signature_CSR.mod_len
+					sconst_2;
+					sdiv;
+					sadd;
+					getfield_s_this 10;		// short Signature/Signature_CSR.mod_len
+					sconst_2;
+					sdiv;
+					invokevirtual 33;		// sendBytesLong([BSS)V
+					goto L29;
+				L28:	sspush 27904;
+					invokestatic 39;		// javacard/framework/ISOException.throwIt(S)V
+				L29:	return;
+		}
+
+	}
+
+}
