@@ -28,6 +28,8 @@ const SignDocument = () => {
         }))
     }
 
+    const [cert, setCert] = useState(null)
+
     const user = useSelector(state => state.data.user.user)
     const docToSign = useSelector(state => state.data.doc.docToSign)
     console.log(docToSign)
@@ -119,24 +121,75 @@ const SignDocument = () => {
         // Sign the document
         const url = URL.createObjectURL(pfxFile.current.files[0])
         await signatureField.signOnNextSaveFromURL(url, password)
-        
-        await signatureField.setLocation(docInfo.location)
-        await signatureField.setReason(docInfo.reason)
-        await signatureField.setContactInfo(docInfo.contact)
+        .then(async () => {
+            await signatureField.setLocation(docInfo.location)
+            await signatureField.setReason(docInfo.reason)
+            await signatureField.setContactInfo(docInfo.contact)
 
-        await doc.fdfMerge(fdfDoc)
+            await doc.fdfMerge(fdfDoc)
 
-        // Convert the document to blob
-        const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
-        const blob = new Blob([docBuf], {type: 'application/pdf'})
-        
-        // Update the document
-        const docRef = ref(storage, docToSign.reference)
-        uploadBytes(docRef, blob).then((snapshot) => {
-            console.log('Document signed', snapshot)
+            // Convert the document to blob
+            const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+            const blob = new Blob([docBuf], {type: 'application/pdf'})
+            
+            // Update the document
+            const docRef = ref(storage, docToSign.reference)
+            uploadBytes(docRef, blob).then((snapshot) => {
+                console.log('Document signed', snapshot)
+            })
+
+            navigate('/')
         })
+        .catch((error) => {
+            alert('Sign failed!')
+            console.log(error)
+        })
+    }
 
-        navigate('/')
+    // Connect to plugin
+    const socket = new WebSocket('ws://localhost:4444')
+    socket.onopen = () => {
+        console.log('Connected to server')
+    }
+    socket.onmessage = (event) => {
+        console.log("Received: " + event.data)
+        setCert(event.data)
+    }
+    socket.onerror = (error) => {
+        console.log(`Error: ${error}`)
+    }
+    function getCertificate() {
+        socket.send('get_certificate')
+    }
+
+    const signDocumentWithCard = async () => {
+        
+        getCertificate();
+        console.log(cert)
+
+        // const { PDFNet, documentViewer } = instance.Core
+        // const doc = await documentViewer.getDocument().getPDFDoc()
+
+        // // Get signature field for signing
+        // const field = await doc.getField(fieldName)
+        // const signatureField = await doc.createDigitalSignatureField(field)
+    
+        // // Create a digital signature dictionary inside the digital signature field
+        // await signatureField.createSigDictForCustomSigning(
+        //     'Adobe.PPKLite',
+        //     PAdES_signing_mode ? PDFNet.DigitalSignatureField.SigningMode.e_PAdES : PDFNet.DigitalSignatureField.SubFilterType.e_adbe_pkcs7_detached,
+        //     7500,
+        // )
+        // await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+
+        // // Update xfdf
+        // const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
+        // await updateDocument(docToSign.docId, user.email, xfdf)
+        // const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
+
+        // // Sign the document
+        // const pdf_digest = await signatureField.calculateDigest(PDFNet.DigestAlgorithm.e_SHA256)
+        // const signer_cert = await PDFNet.X509Certificate.createFromPFX()
     }
 
     return (
@@ -183,6 +236,9 @@ const SignDocument = () => {
                 <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal"
                 >Sign Now &nbsp; <FaFileSignature  /></button>
             </div>
+            
+            <button type='button' className='btn btn-primary btn-lg' onClick={signDocumentWithCard}></button>
+
         </div>
         <div className='sign-viewer'>
             <div className='webviewer' ref={viewer} style={{height: '96vh'}}></div>

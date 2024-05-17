@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Card WebSocket Client</title>
+</head>
+<body>
+    <h1>Java Card WebSocket Client</h1>
+    <input type="text" id="dataToSignInput" placeholder="Enter data to sign" />
+    <button id="signButton">Send to Java Card</button>
+    <pre id="response"></pre>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:4444');
+
+        socket.onopen = function(event) {
+            console.log('Connected to WebSocket server');
+        };
+
+        socket.onmessage = function(event) {
+            console.log('Received message from server:', event.data);
+            document.getElementById('response').textContent = event.data;
+        };
+
+        socket.onerror = function(event) {
+            console.error('WebSocket error observed:', event);
+        };
+
+        function sendDataToServer(data) {
+            socket.send(data);
+            console.log('Sent data to server:', data);
+        }
+
+        document.getElementById('signButton').addEventListener('click', function() {
+            const dataToSign = document.getElementById('dataToSignInput').value;
+            sendDataToServer(dataToSign);
+        });
+    </script>
+</body>
+</html>
