@@ -32,7 +32,6 @@ const SignDocument = () => {
 
     const user = useSelector(state => state.data.user.user)
     const docToSign = useSelector(state => state.data.doc.docToSign)
-    console.log(docToSign)
     
     const pfxFile = useRef(null)
     const viewer = useRef(null)
@@ -90,7 +89,6 @@ const SignDocument = () => {
                                 Annotations.WidgetAnnotation.getCustomStyles = normalStyles
                                 if(annotation.fieldName.startsWith(user.email)) {
                                     if(annotation instanceof Annotations.SignatureWidgetAnnotation) {
-                                        console.log(annotation.fieldName)
                                         setFieldName(annotation.fieldName)
                                     }
                                 }
@@ -152,35 +150,34 @@ const SignDocument = () => {
         console.log('Connected to server')
     }
     socket.onmessage = (event) => {
-        console.log("Received: " + event.data)
+        console.log(event.data)
         setCert(event.data)
     }
     socket.onerror = (error) => {
         console.log(`Error: ${error}`)
     }
-    function getCertificate() {
+    async function getCertificate() {
         socket.send('get_certificate')
     }
 
     const signDocumentWithCard = async () => {
-        
-        getCertificate();
+        await getCertificate()
         console.log(cert)
 
-        // const { PDFNet, documentViewer } = instance.Core
-        // const doc = await documentViewer.getDocument().getPDFDoc()
+        const { PDFNet, documentViewer } = instance.Core
+        const doc = await documentViewer.getDocument().getPDFDoc()
 
         // // Get signature field for signing
-        // const field = await doc.getField(fieldName)
-        // const signatureField = await doc.createDigitalSignatureField(field)
+        const signatureField = await doc.createDigitalSignatureField(fieldName)
+        console.log(PDFNet.DigitalSignatureField.SubFilterType.e_ETSI_CAdES_detached)
     
         // // Create a digital signature dictionary inside the digital signature field
-        // await signatureField.createSigDictForCustomSigning(
-        //     'Adobe.PPKLite',
-        //     PAdES_signing_mode ? PDFNet.DigitalSignatureField.SigningMode.e_PAdES : PDFNet.DigitalSignatureField.SubFilterType.e_adbe_pkcs7_detached,
-        //     7500,
-        // )
-        // await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+        await signatureField.createSigDictForCustomSigning(
+            'Adobe.PPKLite',
+            PDFNet.DigitalSignatureField.SubFilterType.e_ETSI_CAdES_detached,
+            7500,
+        )
+        await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
 
         // // Update xfdf
         // const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
@@ -189,7 +186,9 @@ const SignDocument = () => {
 
         // // Sign the document
         // const pdf_digest = await signatureField.calculateDigest(PDFNet.DigestAlgorithm.e_SHA256)
-        // const signer_cert = await PDFNet.X509Certificate.createFromPFX()
+        // console.log(pdf_digest)
+        // const signer_cert = await PDFNet.X509Certificate.createFromURL(cert.toString())
+        // console.log(signer_cert)
     }
 
     return (
