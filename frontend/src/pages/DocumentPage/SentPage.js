@@ -24,8 +24,6 @@ const SentPage = () => {
         setTimeout(getDocs, 1000)
     }, [user.email])
 
-    console.log(documents)
-
     return (
         <div className="document-page">
             <SideBar />

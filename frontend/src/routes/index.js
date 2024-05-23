@@ -6,7 +6,6 @@ import PasswordReset from '../pages/PasswordReset';
 import HomePage from '../pages/HomePage';
 import InboxPage from '../pages/DocumentPage/InboxPage';
 import SentPage from '../pages/DocumentPage/SentPage';
-import DraftPage from '../pages/DocumentPage/DraftPage';
 import DeletedPage from '../pages/DocumentPage/DeletedPage';
 import Assign from '../pages/Assign';
 import ViewDocument from '../pages/ViewDocument';
@@ -28,11 +27,7 @@ export const publicRoutes = [
         element: <SentPage />
     },
     {
-        path: '/document/draft',
-        element: <DraftPage />
-    },
-    {
-        path: '/document/deleted',
+        path: '/document/delete',
         element: <DeletedPage />
     },
     {

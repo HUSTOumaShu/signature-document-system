@@ -57,7 +57,7 @@ const Content = () => {
                             },
                         ]
                     } />
-                    <DocumentList docType="Need to sign" documents={requiredDoc} />
+                    <DocumentList docType="Inbox" documents={requiredDoc} />
                 </>
             )}
         </div>

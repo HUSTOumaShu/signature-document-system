@@ -134,7 +134,6 @@ const Assign = () => {
                 </div>
                 <div className="button-group">
                     <button type="button" class="btn btn-danger" onClick={discard}>Discard</button>
-                    <button type="button" class="btn btn-warning">Save to Draft</button>
                     <button type="button" class="btn btn-success" onClick={prepare}>Next</button>
                 </div>
 

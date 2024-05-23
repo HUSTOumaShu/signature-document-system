@@ -11,6 +11,7 @@ const ViewDocument = () => {
     const dispatch = useDispatch()
 
     const [instance, setInstance] = useState(null)
+    console.log(docToView)
 
     useEffect(() => {
         WebViewer({
@@ -53,7 +54,19 @@ const ViewDocument = () => {
                         <h4><strong>Title: </strong>{docToView.title}</h4>
                         <span><strong>From:</strong> {docToView.email}</span>
                         <span><strong>Requested Time:</strong> {docToView.requestedTime.toDate().toUTCString()}</span>
-                        <span>Signed Time: {docToView.signedTime.toDate().toUTCString()}</span>
+                        {docToView.isVoided ? (
+                            <>
+                                <span><strong>Voided by:</strong> {docToView.voidedBy}</span>
+                                <span><strong>Voided Time:</strong> {docToView.voidedTime.toDate().toUTCString()}</span>
+                                <span><strong>Reason:</strong> {docToView.reason}</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Signed by: {docToView.email} </span>
+                                <span>Signed Time: {docToView.signedTime.toDate().toUTCString()}</span>
+                            </>
+                        )}
+                        
                     </div>
                     <div className='doc-info'>
                         info

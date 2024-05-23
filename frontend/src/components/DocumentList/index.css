@@ -29,3 +29,6 @@
 td {
     align-content: center;
 }
+.button-group {
+    display: flex;
+}

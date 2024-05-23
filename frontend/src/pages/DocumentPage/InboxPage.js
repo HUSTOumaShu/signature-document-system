@@ -14,15 +14,13 @@ const InboxPage = () => {
 
     useEffect(() => {
         async function getDocs() {
-            const docsToSign = await getInboxDocument(user.email)
-            setDocuments(docsToSign)
+            const docs = await getInboxDocument(user.email)
+            setDocuments(docs)
             setShow(false)
             setIsLoading(false)
         }
         setTimeout(getDocs, 1000)
     }, [user.email])
-
-    console.log(documents)
 
     return (
         <div className="document-page">
