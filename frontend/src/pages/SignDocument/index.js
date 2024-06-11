@@ -30,6 +30,8 @@ const SignDocument = () => {
 
     const user = useSelector(state => state.data.user.user)
     const docToSign = useSelector(state => state.data.doc.docToSign)
+
+    const [otp, setOtp] = useState('')
     
     const pfxFile = useRef(null)
     const viewer = useRef(null)
@@ -151,8 +153,9 @@ const SignDocument = () => {
         const { PDFNet, documentViewer } = instance.Core
         const doc = await documentViewer.getDocument().getPDFDoc()
 
-        // Get certificate from plugin
+        // Send document to plugin 
         const socket = new WebSocket('ws://localhost:4444')
+        socket.binaryType = 'arraybuffer'
         await new Promise((resolve, reject) => {
             socket.onopen = () => {
                 console.log('Connected to server')
@@ -180,7 +183,7 @@ const SignDocument = () => {
 
         // Get signature field for signing
         const signatureField = await doc.createDigitalSignatureField(fieldName)
-    
+
         // Create a digital signature dictionary inside the digital signature field
         await signatureField.createSigDictForCustomSigning(
             'Adobe.PPKLite',
@@ -196,11 +199,9 @@ const SignDocument = () => {
         
         const pdf_digest = await signatureField.calculateDigest(PDFNet.DigestAlgorithm.Type.e_SHA256)
         const signer_cert = await PDFNet.X509Certificate.createFromBuffer(cert)
-        console.log(signer_cert)
-        const pades_versioned_ess_signing_cert_attr = await PDFNet.DigitalSignatureField.generateESSSigningCertPAdESAttribute(signer_cert, PDFNet.DigestAlgorithm.Type.e_SHA256)
-        const signedAttrs = await PDFNet.DigitalSignatureField.generateCMSSignedAttributes(pdf_digest, pades_versioned_ess_signing_cert_attr)
-        const signedAttrs_digest = await PDFNet.DigestAlgorithm.calculateDigest(PDFNet.DigestAlgorithm.Type.e_SHA256, signedAttrs)
-        console.log(signedAttrs_digest)
+
+        const signedAttrs = await PDFNet.DigitalSignatureField.generateCMSSignedAttributes(pdf_digest)
+        console.log(signedAttrs)
 
         // Send the digest to the plugin to sign
         const socket2 = new WebSocket('ws://localhost:4444')
@@ -214,7 +215,7 @@ const SignDocument = () => {
                 reject(error)
             }
         })
-        socket2.send(signedAttrs_digest)
+        socket2.send(signedAttrs)
         const signature_response = await new Promise((resolve, reject) => {
             socket2.onmessage = (message) => {
                 resolve(message.data)
@@ -229,18 +230,64 @@ const SignDocument = () => {
         const chain_cert = [signer_cert]
 
         const digest_algorithm_oid = await PDFNet.ObjectIdentifier.createFromDigestAlgorithm(PDFNet.DigestAlgorithm.Type.e_SHA256)
-        const signature_algorithm_oid = await PDFNet.ObjectIdentifier.createFromPredefined(PDFNet.ObjectIdentifier.Predefined.e_RSA_encryption_PKCS1)
-        console.log(signer_cert, signature_value, signedAttrs)
-        const cms_signature = await PDFNet.DigitalSignatureField.generateCMSSignature(signer_cert, chain_cert, digest_algorithm_oid, signature_algorithm_oid, signature_value, signedAttrs)
-
+        const signature_algorithm_oid = await PDFNet.ObjectIdentifier.createFromIntArray([1,2,840,113549,1,1])
+        console.log('Generate CMS signature')
+        console.log(signer_cert, chain_cert, digest_algorithm_oid, signature_algorithm_oid, signature_value, signedAttrs)
+        const cms_signature = await PDFNet.DigitalSignatureField.generateCMSSignature(
+            signer_cert, 
+            chain_cert, 
+            digest_algorithm_oid, 
+            signature_algorithm_oid, 
+            signature_value, 
+            signedAttrs
+        )
         console.log(cms_signature)
 
+        await doc.saveCustomSignatureBuffer(cms_signature, signatureField)
 
         // // Update xfdf
         // const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
         // await updateDocument(docToSign.docId, user.email, xfdf)
         // const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
 
+    }
+
+    const sendOTP = async () => {
+        let data = {
+            email: user.email,
+        }
+        const res = await fetch('http://localhost:8000/otp/sendOTP', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        }).then((res) => {
+            console.log(res)
+        })
+    }
+
+    const verifyOTP = async () => {
+        let data = {
+            email: user.email,
+            otp: otp
+        }
+        const res = await fetch('http://localhost:8000/otp/verifyOTP', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        }).then((res) => {
+            console.log(res)
+            if(res.status > 199 && res.status < 300) {
+                alert('OTP verified successfully')
+            } else {
+                alert('Invalid OTP')
+            }
+        })
     }
 
     return (
@@ -289,9 +336,13 @@ const SignDocument = () => {
             </div>
             
             <button type='button' className='btn btn-primary btn-lg' onClick={async () => {
-                
                 signDocumentWithCard()
             }}>Card</button>
+
+            <div className='sign-actions'>
+                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#otpModal" onClick={sendOTP}
+                >OTP</button>
+            </div>
 
         </div>
         <div className='sign-viewer'>
@@ -319,6 +370,29 @@ const SignDocument = () => {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" onClick={signDocument} data-bs-dismiss='modal'>Sign Now!</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        {/* OTP Modal */}
+        <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="otpModalLabel">Enter OTP code</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="otp" class="form-label">The OTP has been sent to your email.
+                        <br />Please enter the OTP to sign the document!</label>
+                        <input type="otp" class="form-control" id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Resend OTP</button>
+                    <button type="button" class="btn btn-primary" onClick={verifyOTP} data-bs-dismiss='modal'>Sign Now!</button>
                 </div>
                 </div>
             </div>
