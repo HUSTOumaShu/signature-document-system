@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const otpRoutes = require('./app/routes/otpRoutes');
+const signRoutes = require('./app/routes/signRoutes')
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/otp', otpRoutes);
+app.use('/sign', signRoutes);
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
