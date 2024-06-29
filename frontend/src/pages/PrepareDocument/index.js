@@ -30,8 +30,6 @@ const PrepareDocument = () => {
     const viewer = useRef(null)
     const filePicker = useRef(null)
 
-    console.log(title, message)
-
     useEffect(() => {
         WebViewer(
             {
@@ -285,7 +283,10 @@ const PrepareDocument = () => {
                 </div>
                 <div className='prepare-fields'>
                     <div>Add signature</div>
-                    <select class="form-select" aria-label="Default select example">
+                    <select class="form-select" aria-label="Default select example" onChange={(e) => {
+                        setAssignee(e.target.value)
+                    }
+                    } value={assignee}>
                         {assigneesValues?.map(assignee => {
                             return <option value={assignee.value}>{assignee.label}</option>
                         })}

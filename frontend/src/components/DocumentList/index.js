@@ -111,8 +111,14 @@ const DocumentList = ({docType, documents}) => {
                                         ) : (
                                             <>
                                             <div className='button-group'>
-                                                <button className='btn btn-outline-warning' title='Edit'>
-                                                    <FaEdit />
+                                                <button className='btn btn-outline-success' title='Detail'
+                                                onClick={() => {
+                                                    const {docId, email, emails, title, message, reference, requestedTime, signedTime} = document
+                                                    dispatch(setDocToView({docId, email, emails, title, message, reference, requestedTime, signedTime}))
+                                                    console.log('View', docToView)
+                                                    navigate('/viewDocument')
+                                                }}>
+                                                    <HiInformationCircle />
                                                 </button>
                                                 <button className='btn btn-outline-danger' title='Delete' data-bs-toggle="modal" data-bs-target="#deleteModal"
                                                 onClick={() => handleDelete(document.docId)}>

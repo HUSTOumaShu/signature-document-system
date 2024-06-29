@@ -61,18 +61,6 @@ const SideBar = () => {
                 </div>
             </div>
             
-            <a href="/template" className="item">
-                <CgTemplate fontSize='1.4rem' />
-                Manage Templates
-            </a>
-            <a href="/users" className="item">
-                <AiOutlineUser fontSize='1.4rem' />
-                Manage Users
-            </a>
-            <a href="/certificate" className="item">
-                <GrCertificate fontSize='1.4rem' />
-                Manage Certificates
-            </a>
         </div>
     </div>
 }

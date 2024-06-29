@@ -45,6 +45,7 @@ export const loginWithGoogle = async () => {
             const token = credential.accessToken
             const user = result.user
             console.log(user, token)
+            console.log(auth)
         })
         .catch((error) => {
             const errorMessage = error.message;

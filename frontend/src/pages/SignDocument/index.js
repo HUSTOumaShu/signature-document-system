@@ -2,12 +2,16 @@ import './index.css'
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { FaFileSignature } from 'react-icons/fa'
+import { IoCard } from 'react-icons/io5'
+import { FaSimCard } from 'react-icons/fa'
+import { RiLockPasswordFill } from 'react-icons/ri'
 import WebViewer from '@pdftron/webviewer'
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { storage } from '../../firebase/firebase'
+import { getDownloadURL, ref as ref_storage, uploadBytes } from 'firebase/storage'
+import { db, storage } from '../../firebase/firebase'
 import { updateDocument } from '../../app/document'
 import { useNavigate } from 'react-router-dom'
 import { base642arr } from '../../app/utils/base64ToArrayBuffer'
+import { onValue, push, set, ref as ref_database } from 'firebase/database'
 
 const SignDocument = () => {
     const navigate = useNavigate()
@@ -67,7 +71,7 @@ const SignDocument = () => {
                 instance.UI.setToolbarGroup('toolbarGroup-Insert')
 
                 // load the document
-                const URL = (await getDownloadURL(ref(storage, docToSign.reference))).toString()
+                const URL = (await getDownloadURL(ref_storage(storage, docToSign.reference))).toString()
                 documentViewer.loadDocument(URL)
 
                 const normalStyles = (widget) => {
@@ -134,7 +138,7 @@ const SignDocument = () => {
                 const blob = new Blob([docBuf], {type: 'application/pdf'})
                 
                 // Update the document
-                const docRef = ref(storage, docToSign.reference)
+                const docRef = ref_storage(storage, docToSign.reference)
                 uploadBytes(docRef, blob).then((snapshot) => {
                     console.log('Document signed', snapshot)
                 })
@@ -148,104 +152,6 @@ const SignDocument = () => {
         } finally {
             doc.unlock()
         }
-    }
-
-    const signDocumentWithCard = async () => {
-        const { PDFNet, documentViewer } = instance.Core
-        const doc = await documentViewer.getDocument().getPDFDoc()
-
-        // Get certificate
-        const socket = new WebSocket('ws://localhost:4444')
-        socket.binaryType = 'arraybuffer'
-        await new Promise((resolve, reject) => {
-            socket.onopen = () => {
-                console.log('Connected to server')
-                resolve()
-            }
-            socket.onerror = (error) => {
-                console.log(`Error: ${error}`)
-                reject(error)
-            }
-        })
-        socket.send('get_certificate')
-        const certRes = await new Promise((resolve, reject) => {
-            socket.onmessage = (message) => {
-                resolve(message.data)
-            }
-        })
-        console.log(certRes)
-        const cert = base642arr(certRes);
-        socket.close()
-
-        // Get signature field for signing
-        const signatureField = await doc.createDigitalSignatureField(fieldName)
-
-        // Create a digital signature dictionary inside the digital signature field
-        await signatureField.createSigDictForCustomSigning(
-            'Adobe.PPKLite',
-            PDFNet.DigitalSignatureField.SubFilterType.e_adbe_pkcs7_detached,
-            7500,
-        )
-        
-        const currentTime = new PDFNet.Date()
-        await currentTime.setCurrentTime()  
-        await signatureField.setSigDictTimeOfSigning(currentTime)
-        
-        await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
-        
-        const pdf_digest = await signatureField.calculateDigest(PDFNet.DigestAlgorithm.Type.e_SHA256)
-        const signer_cert = await PDFNet.X509Certificate.createFromBuffer(cert)
-
-        const signedAttrs = await PDFNet.DigitalSignatureField.generateCMSSignedAttributes(pdf_digest)
-        console.log(signedAttrs)
-
-        // Send the digest to the plugin to sign
-        const socket2 = new WebSocket('ws://localhost:4444')
-        await new Promise((resolve, reject) => {
-            socket2.onopen = () => {
-                console.log('Connected to server')
-                resolve()
-            }
-            socket2.onerror = (error) => {
-                console.log(`Error: ${error}`)
-                reject(error)
-            }
-        })
-        socket2.send(signedAttrs)
-        const signature_response = await new Promise((resolve, reject) => {
-            socket2.onmessage = (message) => {
-                resolve(message.data)
-            }
-        })
-        const clean_str = signature_response.replace("[", "").replace("]", "").replace(/ /g, "");
-        const signature_elements = clean_str.split(",").map(str => parseInt(str));
-        const signature_value = new Uint8Array(signature_elements);
-        console.log(signature_value)
-        socket2.close()
-
-        const chain_cert = [signer_cert]
-
-        const digest_algorithm_oid = await PDFNet.ObjectIdentifier.createFromDigestAlgorithm(PDFNet.DigestAlgorithm.Type.e_SHA256)
-        const signature_algorithm_oid = await PDFNet.ObjectIdentifier.createFromPredefined(PDFNet.ObjectIdentifier.Predefined.e_RSA_encryption_PKCS1)
-        console.log('Generate CMS signature')
-        console.log(signer_cert, chain_cert, digest_algorithm_oid, signature_algorithm_oid, signature_value, signedAttrs)
-        const cms_signature = await PDFNet.DigitalSignatureField.generateCMSSignature(
-            signer_cert, 
-            chain_cert,
-            digest_algorithm_oid, 
-            signature_algorithm_oid, 
-            signature_value, 
-            signedAttrs
-        )
-        console.log(cms_signature)
-
-        await doc.saveCustomSignatureBuffer(cms_signature, signatureField)
-
-        // // Update xfdf
-        // const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
-        // await updateDocument(docToSign.docId, user.email, xfdf)
-        // const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
-
     }
 
     const sendOTP = async () => {
@@ -296,6 +202,218 @@ const SignDocument = () => {
         const field = await doc.getField(fieldName)
         const signatureField = await PDFNet.DigitalSignatureField.createFromField(field)
 
+        try {
+            // Update xfdf
+            const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
+            await updateDocument(docToSign.docId, user.email, xfdf)
+            const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
+            console.log(fdfDoc)
+
+            // Create a digital signature dictionary inside the digital signature field
+            await signatureField.createSigDictForCustomSigning(
+                'Adobe.PPKLite',
+                PDFNet.DigitalSignatureField.SubFilterType.e_adbe_pkcs7_detached,
+                7500,
+            )
+            
+            const currentTime = new PDFNet.Date()
+            await currentTime.setCurrentTime()  
+            await signatureField.setSigDictTimeOfSigning(currentTime)
+
+            await signatureField.setLocation(docInfo.location)
+            await signatureField.setReason(docInfo.reason)
+            await signatureField.setContactInfo(docInfo.contact)
+            
+            await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+            
+            const pdf_digest = await signatureField.calculateDigest(PDFNet.DigestAlgorithm.Type.e_SHA256)
+
+            const signedAttrs = await PDFNet.DigitalSignatureField.generateCMSSignedAttributes(pdf_digest)
+            console.log(signedAttrs)
+
+            // Get certificate
+            const res = await fetch('http://localhost:8000/sign/signData', {
+                method: 'POST',
+                body: JSON.stringify({email: user.email, data: signedAttrs}),
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                }
+            }).then(res => res.json()).then(async (res) => {
+                if(res.success) {
+                    // const signature_value = base642arr(res.signature)
+                    const signature_value = new Uint8Array(Object.values(res.signature))
+                    const cert = base642arr(res.certificate);
+                    
+                    const signer_cert = await PDFNet.X509Certificate.createFromBuffer(cert)
+                    console.log(signer_cert)
+                    console.log(signer_cert.toString())
+                    const chain_cert = [signer_cert]
+
+                    const digest_algorithm_oid = await PDFNet.ObjectIdentifier.createFromDigestAlgorithm(PDFNet.DigestAlgorithm.Type.e_SHA256)
+                    const signature_algorithm_oid = await PDFNet.ObjectIdentifier.createFromPredefined(PDFNet.ObjectIdentifier.Predefined.e_RSA_encryption_PKCS1)
+                    console.log('Generate CMS signature')
+                    console.log(signer_cert, chain_cert, digest_algorithm_oid, signature_algorithm_oid, signature_value, signedAttrs)
+                    const cms_signature = await PDFNet.DigitalSignatureField.generateCMSSignature(
+                        signer_cert, 
+                        chain_cert,
+                        digest_algorithm_oid, 
+                        signature_algorithm_oid, 
+                        signature_value, 
+                        signedAttrs
+                    )
+                    console.log(cms_signature)
+                    await doc.saveCustomSignatureBuffer(cms_signature, signatureField)
+
+                    // Convert the document to blob
+                    const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+                    const blob = new Blob([docBuf], {type: 'application/pdf'})
+                    
+                    // Update the document
+                    const docRef = ref_storage(storage, docToSign.reference)
+                    uploadBytes(docRef, blob).then((snapshot) => {
+                        console.log('Document signed', snapshot)
+                    })
+
+                    navigate('/')
+                }
+            })
+        } finally {
+            doc.unlock()
+        }
+    }
+
+    const signDocumentWithCard = async () => {
+        const { PDFNet, documentViewer } = instance.Core
+        const doc = await documentViewer.getDocument().getPDFDoc()
+
+        // Get certificate
+        const socket = new WebSocket('ws://localhost:4444')
+        socket.binaryType = 'arraybuffer'
+        await new Promise((resolve, reject) => {
+            socket.onopen = () => {
+                console.log('Connected to server')
+                resolve()
+            }
+            socket.onerror = (error) => {
+                console.log(`Error: ${error}`)
+                reject(error)
+            }
+        })
+        socket.send('get_certificate')
+        const certRes = await new Promise((resolve, reject) => {
+            socket.onmessage = (message) => {
+                resolve(message.data)
+            }
+        })
+        console.log(certRes)
+        const cert = base642arr(certRes);
+        socket.close()
+
+        // // Update xfdf
+        const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
+        await updateDocument(docToSign.docId, user.email, xfdf)
+        const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
+
+        // Get signature field for signing
+        const signatureField = await doc.createDigitalSignatureField(fieldName)
+
+        try {
+            // Create a digital signature dictionary inside the digital signature field
+            await signatureField.createSigDictForCustomSigning(
+                'Adobe.PPKLite',
+                PDFNet.DigitalSignatureField.SubFilterType.e_adbe_pkcs7_detached,
+                7500,
+            )
+            
+            const currentTime = new PDFNet.Date()
+            await currentTime.setCurrentTime()  
+            await signatureField.setSigDictTimeOfSigning(currentTime)
+
+            await signatureField.setLocation(docInfo.location)
+            await signatureField.setReason(docInfo.reason)
+            await signatureField.setContactInfo(docInfo.contact)
+            
+            await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+            
+            const pdf_digest = await signatureField.calculateDigest(PDFNet.DigestAlgorithm.Type.e_SHA256)
+            const signer_cert = await PDFNet.X509Certificate.createFromBuffer(cert)
+
+            const signedAttrs = await PDFNet.DigitalSignatureField.generateCMSSignedAttributes(pdf_digest)
+            console.log(signedAttrs)
+
+            // Send the digest to the plugin to sign
+            const socket2 = new WebSocket('ws://localhost:4444')
+            await new Promise((resolve, reject) => {
+                socket2.onopen = () => {
+                    console.log('Connected to server')
+                    resolve()
+                }
+                socket2.onerror = (error) => {
+                    console.log(`Error: ${error}`)
+                    reject(error)
+                }
+            })
+            socket2.send(signedAttrs)
+            const signature_response = await new Promise((resolve, reject) => {
+                socket2.onmessage = (message) => {
+                    resolve(message.data)
+                }
+            })
+            const clean_str = signature_response.replace("[", "").replace("]", "").replace(/ /g, "");
+            const signature_elements = clean_str.split(",").map(str => parseInt(str));
+            const signature_value = new Uint8Array(signature_elements);
+            console.log(signature_value)
+            socket2.close()
+
+            const chain_cert = [signer_cert]
+
+            const digest_algorithm_oid = await PDFNet.ObjectIdentifier.createFromDigestAlgorithm(PDFNet.DigestAlgorithm.Type.e_SHA256)
+            const signature_algorithm_oid = await PDFNet.ObjectIdentifier.createFromPredefined(PDFNet.ObjectIdentifier.Predefined.e_RSA_encryption_PKCS1)
+            console.log('Generate CMS signature')
+            console.log(signer_cert, chain_cert, digest_algorithm_oid, signature_algorithm_oid, signature_value, signedAttrs)
+            const cms_signature = await PDFNet.DigitalSignatureField.generateCMSSignature(
+                signer_cert, 
+                chain_cert,
+                digest_algorithm_oid, 
+                signature_algorithm_oid, 
+                signature_value, 
+                signedAttrs
+            )
+            console.log(cms_signature)
+
+            await doc.saveCustomSignatureBuffer(cms_signature, signatureField)
+
+            // Convert the document to blob
+            const docBuf = await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
+            const blob = new Blob([docBuf], {type: 'application/pdf'})
+            
+            // Update the document
+            const docRef = ref_storage(storage, docToSign.reference)
+            uploadBytes(docRef, blob).then((snapshot) => {
+                console.log('Document signed', snapshot)
+            })
+
+            navigate('/')
+        } finally {
+            doc.unlock()
+        }
+    }
+
+    const signDocumentWithSIM = async () => {
+        const { PDFNet, documentViewer } = instance.Core
+        const doc = await documentViewer.getDocument().getPDFDoc()
+
+        // Get signature field for signing
+        const field = await doc.getField(fieldName)
+        const signatureField = await PDFNet.DigitalSignatureField.createFromField(field)
+
+        // Update xfdf
+        const xfdf = await annotationManager.exportAnnotations({links: false, widgets: true})
+        await updateDocument(docToSign.docId, user.email, xfdf)
+        const fdfDoc = await PDFNet.FDFDoc.createFromXFDF(xfdf)
+        console.log(fdfDoc)
+
         // Create a digital signature dictionary inside the digital signature field
         await signatureField.createSigDictForCustomSigning(
             'Adobe.PPKLite',
@@ -306,6 +424,10 @@ const SignDocument = () => {
         const currentTime = new PDFNet.Date()
         await currentTime.setCurrentTime()  
         await signatureField.setSigDictTimeOfSigning(currentTime)
+
+        await signatureField.setLocation(docInfo.location)
+        await signatureField.setReason(docInfo.reason)
+        await signatureField.setContactInfo(docInfo.contact)
         
         await doc.saveMemoryBuffer(PDFNet.SDFDoc.SaveOptions.e_incremental)
         
@@ -314,20 +436,20 @@ const SignDocument = () => {
         const signedAttrs = await PDFNet.DigitalSignatureField.generateCMSSignedAttributes(pdf_digest)
         console.log(signedAttrs)
 
-        // Get certificate
-        const res = await fetch('http://localhost:8000/sign/signData', {
-            method: 'POST',
-            body: JSON.stringify({email: user.email, data: signedAttrs}),
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }
-        }).then(res => res.json()).then(async (res) => {
-            if(res.success) {
-                // const signature_value = base642arr(res.signature)
-                const signature_value = new Uint8Array(Object.values(res.signature))
+        const reqRef = ref_database(db, 'requests')
+        const newReqRef = push(reqRef)
+        const reqId = newReqRef.key
+
+        await set(newReqRef, {
+            data: btoa(String.fromCharCode.apply(null, signedAttrs)),
+        })
+
+        const resRef = ref_database(db, `responses/${reqId}`)
+        onValue(resRef, async (snapshot) => {
+            const res  = snapshot.val()
+            if(res) {
+                const signature_value = base642arr(res.signature)
                 const cert = base642arr(res.certificate);
-                
                 const signer_cert = await PDFNet.X509Certificate.createFromBuffer(cert)
                 console.log(signer_cert)
                 console.log(signer_cert.toString())
@@ -349,6 +471,7 @@ const SignDocument = () => {
                 await doc.saveCustomSignatureBuffer(cms_signature, signatureField)
             }
         })
+            
     }
 
     return (
@@ -393,18 +516,19 @@ const SignDocument = () => {
             <div className='sign-actions'>
                 <div>Apply Fields</div>
                 <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                >Sign Now &nbsp; <FaFileSignature  /></button>
+                >Sign with file pfx &nbsp; <FaFileSignature  /></button>
+
+                <button type='button' className='btn btn-primary btn-lg' onClick={async () => {
+                    signDocumentWithCard()
+                }}>Sign with card &nbsp; <IoCard /></button>
+
+                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#otpModal" onClick={sendOTP}
+                >Sign with OTP <RiLockPasswordFill /></button>
+
+                <button type="button" class="btn btn-primary btn-lg" onClick={signDocumentWithSIM}
+                >Sign with SIM <FaSimCard /></button>
             </div>
             
-            <button type='button' className='btn btn-primary btn-lg' onClick={async () => {
-                signDocumentWithCard()
-            }}>Card</button>
-
-            <div className='sign-actions'>
-                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#otpModal" onClick={sendOTP}
-                >OTP</button>
-            </div>
-
         </div>
         <div className='sign-viewer'>
             <div className='webviewer' ref={viewer} style={{height: '96vh'}}></div>

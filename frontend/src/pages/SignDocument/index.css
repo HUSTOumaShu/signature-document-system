@@ -17,3 +17,9 @@
     width: 100%;
     height: 100%;
 }
+
+.sign-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}

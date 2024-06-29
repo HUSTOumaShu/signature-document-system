@@ -62,14 +62,11 @@ const ViewDocument = () => {
                             </>
                         ) : (
                             <>
-                                <span>Signed by: {docToView.email} </span>
-                                <span>Signed Time: {docToView.signedTime.toDate().toUTCString()}</span>
+                                <span><strong>Signed by:</strong> {docToView.email} </span>
+                                <span><strong>Signed Time:</strong> {docToView.signedTime ? docToView.signedTime.toDate().toUTCString() : ''}</span>
                             </>
                         )}
                         
-                    </div>
-                    <div className='doc-info'>
-                        info
                     </div>
                 </div>
             </div>

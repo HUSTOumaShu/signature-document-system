@@ -1,5 +1,6 @@
 import { addDoc, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { filestore } from "../firebase/firebase";
+import { storage } from "../firebase/firebase";
 
 // Add a new document with a generated id.
 export const addDocument = async (uid, email, title, message, reference, emails) => {
@@ -26,7 +27,6 @@ export const addDocument = async (uid, email, title, message, reference, emails)
             message: message,
             reference: reference,
             emails: emails,
-            signed: signed,
             xfdf: xfdf,
             signedBy: signedBy,
             signed: signed,
